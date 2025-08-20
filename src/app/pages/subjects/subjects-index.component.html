@@ -1,0 +1,51 @@
+<!-- src/pages/subjects/subjects-index.component.html -->
+
+<div class="pageContainer">
+  <div class="leftPanel">
+    <h2 class="title">Buscar Disciplinas</h2>
+    <form (ngSubmit)="$event.preventDefault()" class="searchForm">
+      <input
+        type="text"
+        placeholder="Digite o nome ou descrição..."
+        [(ngModel)]="search"
+        name="search"
+        (ngModelChange)="resetPage()"
+      />
+      <button class="btn btnPrimary">Buscar</button>
+    </form>
+
+    <a routerLink="/subjects/create" class="btn btnSuccess">Cadastrar Nova Disciplina</a>
+  </div>
+
+  <div class="rightPanel">
+    <h2 class="title">Lista de Disciplinas</h2>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Descrição</th>
+          <th>Carga Horária</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let subject of paginated">
+          <td>{{ subject.name }}</td>
+          <td>{{ subject.description }}</td>
+          <td>{{ subject.workloadHours }}</td>
+          <td>
+            <a [routerLink]="['/subjects/details', subject.id]" class="btn btnInfo">Detalhes</a>
+            <a [routerLink]="['/subjects/edit', subject.id]" class="btn btnWarning">Editar</a>
+            <a [routerLink]="['/subjects/delete', subject.id]" class="btn btnDanger">Excluir</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="pagination">
+      <button *ngIf="page > 1" (click)="goToPrevious()" class="pageLink">Anterior</button>
+      <span class="pageInfo">Página {{ page }} de {{ totalPages }}</span>
+      <button *ngIf="page < totalPages" (click)="goToNext()" class="pageLink">Próxima</button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,48 @@
+<!-- src/pages/class-rooms/details/details-classroom.component.html -->
+
+<div class="container" *ngIf="classRoom; else loading">
+  <h1 class="title">Detalhes da Turma</h1>
+
+  <dl class="details">
+    <dt>Nome</dt>
+    <dd>{{ classRoom.name }}</dd>
+
+    <dt>Capacidade</dt>
+    <dd>{{ classRoom.capacity }}</dd>
+
+    <dt>Horário</dt>
+    <dd>{{ classRoom.schedule }}</dd>
+
+    <dt>Disciplinas</dt>
+    <dd>
+      <ul *ngIf="classRoom.subjects?.length; else noSubjects">
+        <li *ngFor="let s of classRoom.subjects">{{ s.name }}</li>
+      </ul>
+      <ng-template #noSubjects>
+        <span class="muted">Sem disciplinas vinculadas.</span>
+      </ng-template>
+    </dd>
+
+    <dt>Professores</dt>
+    <dd>
+      <ul *ngIf="classRoom.teachers?.length; else noTeachers">
+        <li *ngFor="let t of classRoom.teachers">{{ t.name }}</li>
+      </ul>
+      <ng-template #noTeachers>
+        <span class="muted">Sem professores vinculados.</span>
+      </ng-template>
+    </dd>
+
+    <dt>Professor Responsável</dt>
+    <dd>{{ classRoom.classTeacher?.name || 'Não definido' }}</dd>
+  </dl>
+
+  <div class="actions">
+    <a [routerLink]="['/classrooms/edit', classRoom.id]" class="btn btnWarning">Editar</a>
+    <a [routerLink]="['/classrooms']" class="btn btnSecondary">Voltar</a>
+  </div>
+</div>
+
+<ng-template #loading>
+  <p>Carregando...</p>
+</ng-template>

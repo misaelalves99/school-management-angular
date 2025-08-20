@@ -1,0 +1,24 @@
+<!-- src/pages/enrollments/details/details-enrollment.component.html -->
+
+<h1 class="title">Detalhes da Matrícula</h1>
+
+<div class="detailsContainer">
+  <dl class="dlRow">
+    <dt class="dt">Aluno</dt>
+    <dd class="dd">{{ enrollment.studentName ?? 'Aluno não informado' }}</dd>
+
+    <dt class="dt">Turma</dt>
+    <dd class="dd">{{ enrollment.classRoomName ?? 'Turma não informada' }}</dd>
+
+    <dt class="dt">Status</dt>
+    <dd class="dd">{{ enrollment.status ?? '-' }}</dd>
+
+    <dt class="dt">Data da Matrícula</dt>
+    <dd class="dd">{{ enrollment.enrollmentDate | date:'shortDate' }}</dd>
+  </dl>
+</div>
+
+<div>
+  <button class="btn btnWarning" (click)="edit()">Editar</button>
+  <button class="btn btnSecondary" (click)="back()">Voltar</button>
+</div>

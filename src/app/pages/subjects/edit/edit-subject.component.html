@@ -1,0 +1,22 @@
+<!-- src/pages/subjects/edit/edit-subject.component.html -->
+
+<h1 class="title">Editar Disciplina</h1>
+
+<form (ngSubmit)="handleSubmit()" class="form">
+  <input type="hidden" name="id" [(ngModel)]="subject.id" />
+
+  <div class="formGroup">
+    <label for="name">Nome da Disciplina</label>
+    <input type="text" id="name" name="name" [(ngModel)]="subject.name" />
+    <span class="textDanger" *ngIf="errors.name">{{ errors.name }}</span>
+  </div>
+
+  <div class="formGroup">
+    <label for="description">Descrição</label>
+    <textarea id="description" name="description" [(ngModel)]="subject.description"></textarea>
+  </div>
+
+  <button type="submit">Salvar Alterações</button>
+</form>
+
+<button class="btnSecondary" (click)="back()">Voltar à Lista</button>

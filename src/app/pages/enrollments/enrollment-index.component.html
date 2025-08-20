@@ -1,0 +1,49 @@
+<!-- src/pages/enrollments/enrollment-index.component.html -->
+
+<div class="pageContainer">
+  <div class="leftPanel">
+    <h2 class="title">Buscar Matrículas</h2>
+
+    <form class="searchForm" (ngSubmit)="search()">
+      <input type="text" [(ngModel)]="searchString" name="searchString" placeholder="Buscar Matrícula ou Status..." />
+      <button type="submit" class="btn btnPrimary">Buscar</button>
+    </form>
+
+    <a [routerLink]="['/enrollments/create']" class="btn btnSuccess">Cadastrar Nova Matrícula</a>
+  </div>
+
+  <div class="rightPanel">
+    <h2 class="title">Lista de Matrículas</h2>
+
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Aluno</th>
+          <th>Turma</th>
+          <th>Status</th>
+          <th>Data da Matrícula</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let enrollment of data.items">
+          <td>{{ getStudentName(enrollment.studentId) }}</td>
+          <td>{{ getClassRoomName(enrollment.classRoomId) }}</td>
+          <td>{{ enrollment.status }}</td>
+          <td>{{ enrollment.enrollmentDate | date:'shortDate' }}</td>
+          <td>
+            <a [routerLink]="['/enrollments/details', enrollment.id]" class="btn btnInfo">Detalhes</a>
+            <a [routerLink]="['/enrollments/edit', enrollment.id]" class="btn btnWarning">Editar</a>
+            <a [routerLink]="['/enrollments/delete', enrollment.id]" class="btn btnDanger">Excluir</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="pagination">
+      <button *ngIf="data.currentPage > 1" (click)="goToPage(data.currentPage - 1)" class="pageLink">Anterior</button>
+      <span class="pageInfo">Página {{ data.currentPage }} de {{ totalPages }}</span>
+      <button *ngIf="data.currentPage < totalPages" (click)="goToPage(data.currentPage + 1)" class="pageLink">Próxima</button>
+    </div>
+  </div>
+</div>

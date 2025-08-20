@@ -1,0 +1,27 @@
+<!-- src/pages/teachers/create/create-teacher.component.html -->
+
+<h1 class="title">Cadastrar Novo Professor</h1>
+
+<form (ngSubmit)="handleSubmit()" class="form">
+  <div class="create-container">
+
+    <div class="form-group" *ngFor="let field of fields">
+      <label [for]="field.name">{{ field.label }}</label>
+      <input
+        [id]="field.name"
+        [type]="field.type"
+        [(ngModel)]="formData[field.name]"
+        [name]="field.name"
+      />
+      <span class="text-danger" *ngIf="errors[field.name]">
+        {{ errors[field.name] }}
+      </span>
+    </div>
+
+    <button type="submit">Salvar</button>
+  </div>
+</form>
+
+<button type="button" class="btn-secondary" routerLink="/teachers">
+  Voltar à Lista
+</button>

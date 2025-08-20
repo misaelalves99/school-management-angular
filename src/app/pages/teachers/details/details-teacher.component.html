@@ -1,0 +1,22 @@
+<!-- src/pages/teachers/details/details-teacher.component.html -->
+
+<h1 class="title">Detalhes do Professor</h1>
+<div class="container" *ngIf="teacher">
+  <img
+    *ngIf="teacher.photoUrl"
+    [src]="teacher.photoUrl"
+    [alt]="teacher.name + ' foto'"
+    class="profile-photo"
+  />
+  <div><strong>Nome:</strong> {{ teacher.name }}</div>
+  <div><strong>Email:</strong> {{ teacher.email }}</div>
+  <div><strong>Data de Nascimento:</strong> {{ formattedDate }}</div>
+  <div><strong>Disciplina:</strong> {{ teacher.subject }}</div>
+  <div><strong>Telefone:</strong> {{ teacher.phone }}</div>
+  <div><strong>Endereço:</strong> {{ teacher.address }}</div>
+
+  <div class="actions">
+    <button class="btn btn-warning" (click)="editTeacher()">Editar</button>
+    <button class="btn btn-secondary" (click)="goBack()">Voltar à Lista</button>
+  </div>
+</div>

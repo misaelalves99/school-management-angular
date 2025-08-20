@@ -1,0 +1,15 @@
+<!-- src/pages/teachers/delete/delete-teacher.component.html -->
+
+<h1 class="title">Excluir Professor</h1>
+<h3 class="warning">Tem certeza que deseja excluir este professor?</h3>
+
+<div class="infoBox" *ngIf="teacher">
+  <h4>{{ teacher.name }}</h4>
+  <p>E-mail: {{ teacher.email }}</p>
+  <p>Telefone: {{ teacher.phone }}</p>
+</div>
+
+<form class="form" (ngSubmit)="handleDelete()">
+  <button type="submit" class="btn btnDanger">Excluir</button>
+  <button type="button" class="btn btnSecondary" (click)="handleCancel()">Cancelar</button>
+</form>

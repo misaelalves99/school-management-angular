@@ -1,0 +1,9 @@
+/* src/components/footer/footer.component.css */
+
+.footer {
+  /* Adicione aqui o CSS que estava em Footer.module.css */
+  text-align: center;
+  padding: 1rem;
+  background-color: #f5f5f5;
+  color: #333;
+}

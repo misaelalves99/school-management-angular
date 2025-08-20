@@ -1,0 +1,83 @@
+<!-- src/pages/teachers/teachers-page.component.html -->
+
+<div class="pageContainer">
+  <!-- Left Panel -->
+  <div class="leftPanel">
+    <h2 class="title">Buscar Professores</h2>
+    <form (submit)="$event.preventDefault(); goToPage(1);" class="searchForm" role="search">
+      <input
+        type="text"
+        placeholder="Digite o nome ou disciplina..."
+        [(ngModel)]="searchTerm"
+        name="searchString"
+        (ngModelChange)="onSearchChange()"
+        class="searchInput"
+        aria-label="Campo de busca de professores"
+      />
+      <button type="submit" class="btn btnPrimary">Buscar</button>
+    </form>
+
+    <button class="btn btnSuccess" (click)="navigateTo('/teachers/create')">
+      Cadastrar Novo Professor
+    </button>
+  </div>
+
+  <!-- Right Panel -->
+  <div class="rightPanel">
+    <h2 class="title">Lista de Professores</h2>
+
+    <table class="table" aria-label="Lista de professores">
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Email</th>
+          <th>Disciplina</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngIf="currentItems.length === 0">
+          <td colspan="4" style="text-align:center; padding:20px;">Nenhum professor encontrado.</td>
+        </tr>
+        <tr *ngFor="let teacher of currentItems">
+          <td>{{ teacher.name }}</td>
+          <td>{{ teacher.email }}</td>
+          <td>{{ teacher.subject }}</td>
+          <td>
+            <button class="btn btnInfo" (click)="navigateTo('/teachers/details/' + teacher.id)">
+              Detalhes
+            </button>
+            <button class="btn btnWarning" (click)="navigateTo('/teachers/edit/' + teacher.id)">
+              Editar
+            </button>
+            <button class="btn btnDanger" (click)="navigateTo('/teachers/delete/' + teacher.id)">
+              Excluir
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="pagination">
+      <button
+        class="pageLink"
+        (click)="goToPage(currentPage - 1)"
+        [disabled]="currentPage === 1"
+        aria-label="Página anterior"
+      >
+        Anterior
+      </button>
+
+      <span class="pageInfo">Página {{ currentPage }} de {{ totalPages }}</span>
+
+      <button
+        class="pageLink"
+        (click)="goToPage(currentPage + 1)"
+        [disabled]="currentPage === totalPages"
+        aria-label="Próxima página"
+      >
+        Próxima
+      </button>
+    </div>
+  </div>
+</div>

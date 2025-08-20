@@ -1,0 +1,35 @@
+<!-- src/pages/class-rooms/edit/edit-classroom.component.html -->
+
+<h1 class="title">Editar Sala</h1>
+
+<form (ngSubmit)="handleSubmit()" class="form">
+  <input type="hidden" [value]="id" />
+
+  <div class="formGroup">
+    <label for="name">Nome</label>
+    <input
+      id="name"
+      name="name"
+      type="text"
+      [(ngModel)]="formData.name"
+      required
+    />
+  </div>
+
+  <div class="formGroup">
+    <label for="capacity">Capacidade</label>
+    <input
+      id="capacity"
+      name="capacity"
+      type="number"
+      min="1"
+      max="100"
+      [(ngModel)]="formData.capacity"
+      required
+    />
+  </div>
+
+  <button type="submit" class="submit">Salvar Alterações</button>
+</form>
+
+<a [routerLink]="['/classrooms']" class="btnSecondary">Voltar à Lista</a>

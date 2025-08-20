@@ -1,0 +1,47 @@
+<!-- src/pages/class-rooms/classroom-list.component.html -->
+
+<div class="pageContainer">
+  <div class="leftPanel">
+    <h2 class="title">Buscar Salas</h2>
+    <form (ngSubmit)="handleSearch($event)" class="searchForm">
+      <input
+        type="text"
+        [(ngModel)]="searchString"
+        name="searchString"
+        placeholder="Digite o nome da sala..."
+      />
+      <button type="submit" class="btn btnPrimary">Buscar</button>
+    </form>
+    <a routerLink="/classrooms/create" class="btn btnSuccess">Cadastrar Nova Sala</a>
+  </div>
+
+  <div class="rightPanel">
+    <h2 class="title">Lista de Salas</h2>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Capacidade</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let room of pagedData">
+          <td>{{ room.name }}</td>
+          <td>{{ room.capacity }}</td>
+          <td>
+            <a [routerLink]="['/classrooms/edit', room.id]" class="btn btnWarning">Editar</a>
+            <a [routerLink]="['/classrooms/details', room.id]" class="btn btnInfo">Detalhes</a>
+            <a [routerLink]="['/classrooms/delete', room.id]" class="btn btnDanger">Excluir</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="pagination">
+      <button *ngIf="page > 1" class="pageLink" (click)="previousPage()">Anterior</button>
+      <span class="pageInfo">Página {{ page }} de {{ totalPages }}</span>
+      <button *ngIf="page < totalPages" class="pageLink" (click)="nextPage()">Próxima</button>
+    </div>
+  </div>
+</div>

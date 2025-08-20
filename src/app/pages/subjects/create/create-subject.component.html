@@ -1,0 +1,33 @@
+<!-- src/pages/subjects/create/create-subject.component.html -->
+
+<h1 class="title">Cadastrar Nova Disciplina</h1>
+
+<form (ngSubmit)="handleSubmit()" class="form">
+  <div class="createContainer">
+    <div class="formGroup">
+      <label for="name">Nome da Disciplina</label>
+      <input
+        type="text"
+        id="name"
+        name="name"
+        [(ngModel)]="subject.name"
+        (ngModelChange)="handleChange('name', $event)"
+      />
+      <span *ngIf="errors.name" class="textDanger">{{ errors.name }}</span>
+    </div>
+
+    <div class="formGroup">
+      <label for="description">Descrição</label>
+      <textarea
+        id="description"
+        name="description"
+        [(ngModel)]="subject.description"
+        (ngModelChange)="handleChange('description', $event)"
+      ></textarea>
+    </div>
+
+    <button type="submit">Salvar</button>
+  </div>
+</form>
+
+<button class="btnSecondary" type="button" (click)="goBack()">Voltar à Lista</button>

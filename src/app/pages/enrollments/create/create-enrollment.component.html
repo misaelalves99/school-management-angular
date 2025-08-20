@@ -1,0 +1,51 @@
+<!-- src/pages/enrollments/create/create-enrollment.component.html -->
+
+<h1 class="title">Nova Matrícula</h1>
+
+<form (ngSubmit)="handleSubmit()" class="form">
+  <div class="form-group">
+    <label for="studentId">Aluno</label>
+    <select
+      id="studentId"
+      name="studentId"
+      [(ngModel)]="form.studentId"
+      class="form-control"
+    >
+      <option value="">Selecione o Aluno</option>
+      <option *ngFor="let s of students" [value]="s.id">{{ s.name }}</option>
+    </select>
+    <span *ngIf="errors.studentId" class="text-danger">{{ errors.studentId }}</span>
+  </div>
+
+  <div class="form-group">
+    <label for="classRoomId">Turma</label>
+    <select
+      id="classRoomId"
+      name="classRoomId"
+      [(ngModel)]="form.classRoomId"
+      class="form-control"
+    >
+      <option value="">Selecione a Turma</option>
+      <option *ngFor="let c of classRooms" [value]="c.id">{{ c.name }}</option>
+    </select>
+    <span *ngIf="errors.classRoomId" class="text-danger">{{ errors.classRoomId }}</span>
+  </div>
+
+  <div class="form-group">
+    <label for="enrollmentDate">Data da Matrícula</label>
+    <input
+      id="enrollmentDate"
+      name="enrollmentDate"
+      type="date"
+      [(ngModel)]="form.enrollmentDate"
+      class="form-control"
+    />
+    <span *ngIf="errors.enrollmentDate" class="text-danger">{{ errors.enrollmentDate }}</span>
+  </div>
+
+  <div class="form-group">
+    <button type="submit" class="btn-submit">Salvar</button>
+  </div>
+</form>
+
+<button type="button" class="btn-secondary" (click)="goBack()">Voltar à Lista</button>

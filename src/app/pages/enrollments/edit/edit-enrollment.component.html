@@ -1,0 +1,47 @@
+<!-- src/pages/enrollments/edit/edit-enrollment.component.html -->
+
+<h1 class="title">Editar Matrícula</h1>
+
+<form (ngSubmit)="handleSubmit()" class="form">
+  <input type="hidden" [value]="formData.id" />
+
+  <div class="formGroup">
+    <label for="studentId">Aluno</label>
+    <input
+      id="studentId"
+      type="number"
+      [(ngModel)]="formData.studentId"
+      name="studentId"
+      class="input"
+    />
+    <span class="textDanger" *ngIf="errors.studentId">{{ errors.studentId }}</span>
+  </div>
+
+  <div class="formGroup">
+    <label for="classRoomId">Turma</label>
+    <input
+      id="classRoomId"
+      type="number"
+      [(ngModel)]="formData.classRoomId"
+      name="classRoomId"
+      class="input"
+    />
+    <span class="textDanger" *ngIf="errors.classRoomId">{{ errors.classRoomId }}</span>
+  </div>
+
+  <div class="formGroup">
+    <label for="enrollmentDate">Data da Matrícula</label>
+    <input
+      id="enrollmentDate"
+      type="date"
+      [(ngModel)]="formData.enrollmentDate"
+      name="enrollmentDate"
+      class="input"
+    />
+    <span class="textDanger" *ngIf="errors.enrollmentDate">{{ errors.enrollmentDate }}</span>
+  </div>
+
+  <button type="submit" class="btnSubmit">Salvar Alterações</button>
+</form>
+
+<button class="btnSecondary" (click)="back()">Voltar à Lista</button>

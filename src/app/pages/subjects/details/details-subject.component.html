@@ -1,0 +1,25 @@
+<!-- src/pages/subjects/details/details-subject.component.html -->
+
+<h1 class="title">Detalhes da Disciplina</h1>
+
+<div *ngIf="subject; else notFound" class="container">
+  <dl class="row">
+    <dt>Nome</dt>
+    <dd>{{ subject.name }}</dd>
+
+    <dt>Carga Horária</dt>
+    <dd>{{ subject.workloadHours }} horas</dd>
+  </dl>
+</div>
+
+<ng-template #notFound>
+  <div class="container">
+    <h2>Disciplina não encontrada.</h2>
+    <button class="btn btnSecondary" (click)="back()">Voltar</button>
+  </div>
+</ng-template>
+
+<div *ngIf="subject" class="actions">
+  <button class="btn btnWarning" (click)="edit()">Editar</button>
+  <button class="btn btnSecondary" (click)="back()">Voltar</button>
+</div>
