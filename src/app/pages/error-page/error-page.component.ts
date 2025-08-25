@@ -2,7 +2,7 @@
 
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink, NavigationExtras } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 interface ErrorData {
   message: string;
