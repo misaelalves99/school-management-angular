@@ -2,34 +2,22 @@
 
 <h1 class="title">Editar Sala</h1>
 
-<form (ngSubmit)="handleSubmit()" class="form">
-  <input type="hidden" [value]="id" />
-
+<form *ngIf="classRoom" (ngSubmit)="handleSubmit()" class="form">
   <div class="formGroup">
     <label for="name">Nome</label>
-    <input
-      id="name"
-      name="name"
-      type="text"
-      [(ngModel)]="formData.name"
-      required
-    />
+    <input id="name" name="name" type="text" [(ngModel)]="formData.name" required />
   </div>
 
   <div class="formGroup">
     <label for="capacity">Capacidade</label>
-    <input
-      id="capacity"
-      name="capacity"
-      type="number"
-      min="1"
-      max="100"
-      [(ngModel)]="formData.capacity"
-      required
-    />
+    <input id="capacity" name="capacity" type="number" min="1" max="100" [(ngModel)]="formData.capacity" required />
   </div>
 
-  <button type="submit" class="submit">Salvar Alterações</button>
-</form>
+  <div class="formGroup">
+    <label for="schedule">Horário</label>
+    <input id="schedule" name="schedule" type="text" [(ngModel)]="formData.schedule" />
+  </div>
 
-<a [routerLink]="['/classrooms']" class="btnSecondary">Voltar à Lista</a>
+  <button type="submit" class="btnPrimary">Salvar Alterações</button>
+  <button type="button" class="btnSecondary" (click)="cancel()">Cancelar</button>
+</form>

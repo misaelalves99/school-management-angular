@@ -4,9 +4,9 @@
 
 <h3 class="warning">Tem certeza que deseja excluir esta matrícula?</h3>
 
-<div class="detailsContainer">
-  <h4>Aluno: {{ enrollment.studentName ?? 'Aluno não informado' }}</h4>
-  <p>Turma: {{ enrollment.classRoomName ?? 'Turma não informada' }}</p>
+<div class="detailsContainer" *ngIf="enrollment">
+  <h4>Aluno: {{ student?.name || 'Aluno não informado' }}</h4>
+  <p>Turma: {{ classRoom?.name || 'Turma não informada' }}</p>
   <p>Data da Matrícula: {{ enrollment.enrollmentDate | date:'shortDate' }}</p>
 </div>
 

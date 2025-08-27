@@ -1,26 +1,32 @@
 <!-- src/pages/students/edit/edit-page.component.html -->
 
+<!-- src/pages/students/edit/edit-page.component.html -->
+
 <h1 class="title">Editar Aluno</h1>
 
 <form (ngSubmit)="handleSubmit()" class="form">
   <div class="formGroup">
     <label for="name">Nome</label>
     <input id="name" name="name" [(ngModel)]="formData.name" type="text" />
+    <span class="textDanger" *ngIf="errors.name">{{ errors.name }}</span>
   </div>
 
   <div class="formGroup">
     <label for="email">Email</label>
     <input id="email" name="email" [(ngModel)]="formData.email" type="email" />
+    <span class="textDanger" *ngIf="errors.email">{{ errors.email }}</span>
   </div>
 
   <div class="formGroup">
     <label for="dateOfBirth">Data de Nascimento</label>
     <input id="dateOfBirth" name="dateOfBirth" [(ngModel)]="formData.dateOfBirth" type="date" />
+    <span class="textDanger" *ngIf="errors.dateOfBirth">{{ errors.dateOfBirth }}</span>
   </div>
 
   <div class="formGroup">
     <label for="enrollmentNumber">Matrícula</label>
     <input id="enrollmentNumber" name="enrollmentNumber" [(ngModel)]="formData.enrollmentNumber" type="text" />
+    <span class="textDanger" *ngIf="errors.enrollmentNumber">{{ errors.enrollmentNumber }}</span>
   </div>
 
   <div class="formGroup">

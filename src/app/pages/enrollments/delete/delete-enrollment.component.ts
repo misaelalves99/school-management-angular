@@ -1,40 +1,65 @@
 // src/pages/enrollments/delete/delete-enrollment.component.ts
 
-import { Component, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+// src/pages/enrollments/delete/delete-enrollment.component.ts
 
-export interface EnrollmentDetails {
-  id: number;
-  studentName: string | null;
-  classRoomName: string | null;
-  enrollmentDate: string; // ISO string (yyyy-mm-dd)
-  status: string; // Mantido para tipagem
-}
+import { Component, OnInit, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Router, ActivatedRoute, RouterModule } from '@angular/router';
+import { EnrollmentService, Enrollment } from '../../../services/enrollment.service';
+import { StudentService } from '../../../services/student.service';
+import { ClassRoomService } from '../../../services/classroom.service';
+import { Student } from '../../../types/student.model';
+import { ClassRoom } from '../../../types/classroom.model';
 
 @Component({
   selector: 'app-delete-enrollment',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './delete-enrollment.component.html',
-  styleUrls: ['./delete-enrollment.component.css'],
+  styleUrls: ['./delete-enrollment.component.css']
 })
-export class DeleteEnrollmentComponent {
-  @Input() enrollment!: EnrollmentDetails;
-  @Input() onDelete!: (id: number) => Promise<void>;
+export class DeleteEnrollmentComponent implements OnInit {
+  private enrollmentService = inject(EnrollmentService);
+  private studentService = inject(StudentService);
+  private classRoomService = inject(ClassRoomService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
-  constructor(private router: Router) {}
+  enrollment: Enrollment | null = null;
+  student: Student | null = null;
+  classRoom: ClassRoom | null = null;
 
-  async handleDelete() {
-    try {
-      await this.onDelete(this.enrollment.id);
+  ngOnInit(): void {
+    const id = Number(this.route.snapshot.paramMap.get('id'));
+    if (!id) {
+      alert('ID inválido');
       this.router.navigate(['/enrollments']);
-    } catch (error) {
-      console.error('Erro ao excluir matrícula:', error);
+      return;
+    }
+
+    this.enrollmentService.getById(id).subscribe(e => {
+      if (!e) {
+        alert('Matrícula não encontrada');
+        this.router.navigate(['/enrollments']);
+        return;
+      }
+      this.enrollment = e;
+
+      // Buscar dados do aluno e da sala
+      this.studentService.getById(e.studentId).subscribe(s => this.student = s ?? null);
+      this.classRoomService.getById(e.classRoomId).subscribe(c => this.classRoom = c ?? null);
+    });
+  }
+
+  handleDelete(): void {
+    if (!this.enrollment) return;
+    if (confirm(`Confirma exclusão da matrícula do aluno ${this.student?.name || 'Desconhecido'}?`)) {
+      this.enrollmentService.delete(this.enrollment.id);
+      this.router.navigate(['/enrollments']);
     }
   }
 
-  cancel() {
+  cancel(): void {
     this.router.navigate(['/enrollments']);
   }
 }

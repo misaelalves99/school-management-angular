@@ -1,8 +1,8 @@
 // src/pages/class-rooms/delete/delete-classroom.component.ts
 
 import { Component, OnInit, inject } from '@angular/core';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { ClassRoomService } from '../../../services/classroom.service';
 import { ClassRoom } from '../../../types/classroom.model';
 import { Subject } from '../../../types/subject.model';
@@ -12,7 +12,7 @@ import { Subject } from '../../../types/subject.model';
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './delete-classroom.component.html',
-  styleUrls: ['./delete-classroom.component.css']
+  styleUrls: ['./delete-classroom.component.css'],
 })
 export class DeleteClassroomComponent implements OnInit {
   private classRoomService = inject(ClassRoomService);
@@ -23,8 +23,25 @@ export class DeleteClassroomComponent implements OnInit {
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
-    this.classRoomService.getById(id).subscribe(cr => {
-      this.classRoom = cr ?? null;
+    if (!id) {
+      alert('ID inválido');
+      this.router.navigate(['/classrooms']);
+      return;
+    }
+
+    this.classRoomService.getById(id).subscribe({
+      next: (cr) => {
+        if (!cr) {
+          alert('Sala não encontrada.');
+          this.router.navigate(['/classrooms']);
+          return;
+        }
+        this.classRoom = cr;
+      },
+      error: () => {
+        alert('Erro ao carregar a sala.');
+        this.router.navigate(['/classrooms']);
+      },
     });
   }
 
@@ -37,6 +54,7 @@ export class DeleteClassroomComponent implements OnInit {
 
     if (confirm(`Confirma exclusão da sala: ${this.classRoom.name}?`)) {
       this.classRoomService.delete(this.classRoom.id);
+      alert('Sala excluída com sucesso!');
       this.router.navigate(['/classrooms']);
     }
   }

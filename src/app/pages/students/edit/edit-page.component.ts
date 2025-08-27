@@ -1,41 +1,10 @@
 // src/pages/students/edit/edit-page.component.ts
 
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-
-interface Student {
-  id?: string;
-  name: string;
-  email: string;
-  dateOfBirth: string;
-  enrollmentNumber: string;
-  phone: string;
-  address: string;
-}
-
-// Mock simples de dados para exemplo
-const mockStudents: Student[] = [
-  {
-    id: '1',
-    name: 'João Silva',
-    email: 'joao@example.com',
-    dateOfBirth: '2000-01-01',
-    enrollmentNumber: '20230001',
-    phone: '123456789',
-    address: 'Rua A',
-  },
-  {
-    id: '2',
-    name: 'Maria Oliveira',
-    email: 'maria@example.com',
-    dateOfBirth: '1999-05-15',
-    enrollmentNumber: '20230002',
-    phone: '987654321',
-    address: 'Rua B',
-  },
-];
+import { StudentService, StudentFormData } from '../../../services/student.service';
 
 @Component({
   selector: 'app-edit-student',
@@ -44,9 +13,10 @@ const mockStudents: Student[] = [
   templateUrl: './edit-page.component.html',
   styleUrls: ['./edit-page.component.css'],
 })
-export class EditStudentComponent {
-  id: string | null = null;
-  formData: Student = {
+export class EditStudentComponent implements OnInit {
+  id: number | null = null;
+
+  formData: StudentFormData = {
     name: '',
     email: '',
     dateOfBirth: '',
@@ -55,35 +25,65 @@ export class EditStudentComponent {
     address: '',
   };
 
-  constructor(private route: ActivatedRoute, private router: Router) {
-    this.id = this.route.snapshot.paramMap.get('id');
-    this.loadStudent();
-  }
+  errors: Partial<Record<keyof StudentFormData, string>> = {};
 
-  loadStudent() {
-    if (!this.id) {
-      alert('ID do aluno não fornecido.');
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private studentService: StudentService
+  ) {}
+
+  ngOnInit(): void {
+    const idParam = this.route.snapshot.paramMap.get('id');
+    const parsedId = Number(idParam);
+
+    if (!idParam || isNaN(parsedId)) {
+      alert('ID inválido.');
       this.router.navigate(['/students']);
       return;
     }
 
-    const student = mockStudents.find((s) => s.id === this.id);
-    if (!student) {
-      alert('Aluno não encontrado.');
+    this.id = parsedId;
+
+    this.studentService.getById(this.id).subscribe((student) => {
+      if (!student) {
+        alert('Aluno não encontrado.');
+        this.router.navigate(['/students']);
+        return;
+      }
+      // Remove o id para editar apenas os campos do formulário
+      const { id: _ignored, ...rest } = student;
+      this.formData = { ...rest };
+    });
+  }
+
+  private validate(): boolean {
+    const errs: Partial<Record<keyof StudentFormData, string>> = {};
+    if (!this.formData.name?.trim()) errs.name = 'Nome é obrigatório.';
+    if (!this.formData.email?.trim()) errs.email = 'Email é obrigatório.';
+    else if (!/\S+@\S+\.\S+/.test(this.formData.email)) errs.email = 'Email inválido.';
+    if (!this.formData.dateOfBirth) errs.dateOfBirth = 'Data de nascimento é obrigatória.';
+    if (!this.formData.enrollmentNumber?.trim()) errs.enrollmentNumber = 'Matrícula é obrigatória.';
+
+    this.errors = errs;
+    return Object.keys(errs).length === 0;
+  }
+
+  handleSubmit(): void {
+    if (this.id == null) return;
+    if (!this.validate()) return;
+
+    this.studentService.update(this.id, this.formData).subscribe((updated) => {
+      if (!updated) {
+        alert('Falha ao atualizar: aluno não encontrado.');
+        return;
+      }
+      alert('Aluno atualizado com sucesso!');
       this.router.navigate(['/students']);
-      return;
-    }
-
-    this.formData = { ...student };
+    });
   }
 
-  handleSubmit() {
-    // TODO: salvar aluno editado via API ou state global
-    alert('Aluno atualizado!');
-    this.router.navigate(['/students']);
-  }
-
-  cancel() {
+  cancel(): void {
     this.router.navigate(['/students']);
   }
 }

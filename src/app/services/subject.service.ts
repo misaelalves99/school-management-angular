@@ -8,8 +8,15 @@ import { Subject } from '../types/subject.model';
   providedIn: 'root',
 })
 export class SubjectService {
-  // Inicializa vazio — pode ser alimentado dinamicamente depois
-  private subjectsSubject = new BehaviorSubject<Subject[]>([]);
+  // Mock inicial de disciplinas
+  private initialSubjects: Subject[] = [
+    { id: 1, name: 'Matemática', description: 'Estudo de números, álgebra e geometria', workloadHours: 80 },
+    { id: 2, name: 'História', description: 'Estudo do passado da humanidade', workloadHours: 60 },
+    { id: 3, name: 'Física', description: 'Estudo das leis naturais e fenômenos físicos', workloadHours: 70 },
+    { id: 4, name: 'Química', description: 'Estudo da composição da matéria e suas transformações', workloadHours: 65 },
+  ];
+
+  private subjectsSubject = new BehaviorSubject<Subject[]>(this.initialSubjects);
   subjects$ = this.subjectsSubject.asObservable();
 
   getAll(): Observable<Subject[]> {
@@ -21,9 +28,13 @@ export class SubjectService {
     return of(subject);
   }
 
-  add(subject: Subject): void {
+  add(subject: Omit<Subject, 'id'>): void {
     const current = this.subjectsSubject.getValue();
-    this.subjectsSubject.next([...current, subject]);
+    const newSubject: Subject = {
+      ...subject,
+      id: current.length > 0 ? Math.max(...current.map(s => s.id)) + 1 : 1,
+    };
+    this.subjectsSubject.next([...current, newSubject]);
   }
 
   update(subject: Subject): void {

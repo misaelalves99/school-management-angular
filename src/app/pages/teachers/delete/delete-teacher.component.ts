@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { TeacherService } from '../../../services/teacher.service';
 import { Teacher } from '../../../types/teacher.model';
+import { take } from 'rxjs/operators';
 
 @Component({
   selector: 'app-delete-teacher',
@@ -19,16 +20,21 @@ export class DeleteTeacherComponent implements OnInit {
   private route = inject(ActivatedRoute);
 
   teacher: Teacher | null = null;
+  loading = true;
+  deleting = false;
 
   ngOnInit(): void {
-    const id = Number(this.route.snapshot.paramMap.get('id'));
-    if (!id) {
-      alert('ID inválido');
+    const idParam = this.route.snapshot.paramMap.get('id');
+    const id = idParam !== null ? Number(idParam) : NaN;
+
+    if (isNaN(id) || id <= 0) {
+      alert('ID inválido.');
       this.router.navigate(['/teachers']);
       return;
     }
 
-    this.teacherService.getById(id).subscribe({
+    // Carrega o professor uma vez
+    this.teacherService.getById(id).pipe(take(1)).subscribe({
       next: (t) => {
         if (!t) {
           alert('Professor não encontrado.');
@@ -36,6 +42,7 @@ export class DeleteTeacherComponent implements OnInit {
           return;
         }
         this.teacher = t;
+        this.loading = false;
       },
       error: () => {
         alert('Erro ao carregar professor.');
@@ -47,20 +54,26 @@ export class DeleteTeacherComponent implements OnInit {
   handleDelete(): void {
     if (!this.teacher) return;
 
-    if (confirm(`Confirma exclusão do professor: ${this.teacher.name}?`)) {
-      this.teacherService.delete(this.teacher.id).subscribe({
-        next: () => {
-          alert('Professor excluído com sucesso.');
-          this.router.navigate(['/teachers']);
-        },
-        error: (err) => {
-          alert('Erro ao excluir professor: ' + err.message);
-        },
-      });
-    }
+    const confirmed = confirm(`Confirma exclusão do professor: ${this.teacher.name}?`);
+    if (!confirmed) return;
+
+    this.deleting = true;
+
+    this.teacherService.delete(this.teacher.id).pipe(take(1)).subscribe({
+      next: () => {
+        this.deleting = false;
+        alert('Professor excluído com sucesso.');
+        this.router.navigate(['/teachers']);
+      },
+      error: (err) => {
+        this.deleting = false;
+        alert('Erro ao excluir professor: ' + (err?.message ?? err));
+      },
+    });
   }
 
   handleCancel(): void {
+    if (this.deleting) return;
     this.router.navigate(['/teachers']);
   }
 }

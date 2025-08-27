@@ -3,6 +3,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
+import { StudentService } from '../../../services/student.service';
 
 @Component({
   selector: 'app-delete-student',
@@ -14,12 +15,19 @@ import { Router, ActivatedRoute } from '@angular/router';
 export class DeleteStudentComponent {
   id: string | null = null;
 
-  constructor(private route: ActivatedRoute, private router: Router) {
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private studentService: StudentService
+  ) {
     this.id = this.route.snapshot.paramMap.get('id');
   }
 
   handleDelete() {
-    // TODO: API call para deletar aluno
+    if (!this.id) return;
+
+    const studentId = Number(this.id);
+    this.studentService.delete(studentId); // remove o aluno do service
     alert(`Aluno ${this.id} excluído!`);
     this.router.navigate(['/students']);
   }

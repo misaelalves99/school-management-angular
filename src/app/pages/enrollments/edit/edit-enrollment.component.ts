@@ -1,85 +1,72 @@
 // src/pages/enrollments/edit/edit-enrollment.component.ts
 
-import { Component, Input } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-
-export interface EnrollmentEdit {
-  id: number;
-  studentId: number;
-  classRoomId: number;
-  enrollmentDate: string; // ISO date string
-  status: string;
-}
-
-type EnrollmentErrors = {
-  studentId?: string;
-  classRoomId?: string;
-  enrollmentDate?: string;
-};
+import { EnrollmentService, Enrollment } from '../../../services/enrollment.service';
+import { StudentService } from '../../../services/student.service';
+import { ClassRoomService } from '../../../services/classroom.service';
+import { Student } from '../../../types/student.model';
+import { ClassRoom } from '../../../types/classroom.model';
 
 @Component({
   selector: 'app-edit-enrollment',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './edit-enrollment.component.html',
   styleUrls: ['./edit-enrollment.component.css'],
 })
-export class EditEnrollmentComponent {
-  @Input() enrollment!: EnrollmentEdit;
-  @Input() onSave!: (data: EnrollmentEdit) => Promise<void>;
+export class EditEnrollmentComponent implements OnInit {
+  private enrollmentService = inject(EnrollmentService);
+  private studentService = inject(StudentService);
+  private classRoomService = inject(ClassRoomService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
-  formData!: EnrollmentEdit;
-  errors: EnrollmentErrors = {};
+  enrollment!: Enrollment;
+  students: Student[] = [];
+  classRooms: ClassRoom[] = [];
 
-  constructor(private router: Router) {}
+  formData!: Enrollment;
+  errors: { studentId?: string; classRoomId?: string; enrollmentDate?: string } = {};
 
-  ngOnInit() {
-    this.formData = { ...this.enrollment };
-  }
-
-  handleChange(event: Event, field: keyof EnrollmentEdit) {
-    const target = event.target as HTMLInputElement;
-
-    // mapeamento explícito para evitar erro de `never`
-    if (field === 'studentId' || field === 'classRoomId') {
-      this.formData = {
-        ...this.formData,
-        [field]: Number(target.value) as any,
-      };
-    } else if (field === 'enrollmentDate' || field === 'status') {
-      this.formData = {
-        ...this.formData,
-        [field]: target.value as any,
-      };
+  ngOnInit(): void {
+    const id = Number(this.route.snapshot.paramMap.get('id'));
+    if (!id) {
+      alert('ID inválido');
+      this.router.navigate(['/enrollments']);
+      return;
     }
+
+    this.enrollmentService.getById(id).subscribe(e => {
+      if (!e) {
+        alert('Matrícula não encontrada');
+        this.router.navigate(['/enrollments']);
+        return;
+      }
+      this.enrollment = e;
+      this.formData = { ...e };
+    });
+
+    // Carregar alunos e salas
+    this.studentService.getAll().subscribe(students => this.students = students);
+    this.classRoomService.getAll().subscribe(classRooms => this.classRooms = classRooms);
   }
 
-  async handleSubmit() {
+  handleSubmit(): void {
     this.errors = {};
-
-    if (!this.formData.studentId) {
-      this.errors.studentId = 'Aluno é obrigatório.';
-    }
-    if (!this.formData.classRoomId) {
-      this.errors.classRoomId = 'Turma é obrigatória.';
-    }
-    if (!this.formData.enrollmentDate) {
-      this.errors.enrollmentDate = 'Data da matrícula é obrigatória.';
-    }
+    if (!this.formData.studentId) this.errors.studentId = 'Aluno é obrigatório.';
+    if (!this.formData.classRoomId) this.errors.classRoomId = 'Turma é obrigatória.';
+    if (!this.formData.enrollmentDate) this.errors.enrollmentDate = 'Data é obrigatória.';
 
     if (Object.keys(this.errors).length > 0) return;
 
-    try {
-      await this.onSave(this.formData);
-      this.router.navigate(['/enrollments']);
-    } catch (error) {
-      console.error('Erro ao salvar matrícula:', error);
-    }
+    this.enrollmentService.update(this.formData);
+    this.router.navigate(['/enrollments']);
   }
 
-  back() {
+  back(): void {
     this.router.navigate(['/enrollments']);
   }
 }

@@ -7,8 +7,6 @@ import { RouterModule } from '@angular/router';
 import { Subject } from '../../types/subject.model';
 import { SubjectService } from '../../services/subject.service';
 
-const PAGE_SIZE = 2;
-
 @Component({
   selector: 'app-subjects-index',
   standalone: true,
@@ -21,12 +19,10 @@ export class SubjectsIndexComponent implements OnInit {
 
   subjects: Subject[] = [];
   search = '';
-  page = 1;
 
   ngOnInit(): void {
     this.subjectService.getAll().subscribe(subjects => {
       this.subjects = subjects;
-      this.page = 1;
     });
   }
 
@@ -35,26 +31,5 @@ export class SubjectsIndexComponent implements OnInit {
     return this.subjects.filter(
       s => s.name.toLowerCase().includes(term) || s.description.toLowerCase().includes(term)
     );
-  }
-
-  get totalPages(): number {
-    return Math.ceil(this.filtered.length / PAGE_SIZE) || 1;
-  }
-
-  get paginated(): Subject[] {
-    const start = (this.page - 1) * PAGE_SIZE;
-    return this.filtered.slice(start, start + PAGE_SIZE);
-  }
-
-  goToPrevious() {
-    if (this.page > 1) this.page--;
-  }
-
-  goToNext() {
-    if (this.page < this.totalPages) this.page++;
-  }
-
-  resetPage() {
-    this.page = 1;
   }
 }

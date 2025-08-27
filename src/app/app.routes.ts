@@ -1,5 +1,7 @@
 // src/app/app.routes.ts
 
+// src/app/app.routes.ts
+
 import { Routes } from '@angular/router';
 
 // Home
@@ -21,6 +23,7 @@ import { DeleteTeacherComponent } from './pages/teachers/delete/delete-teacher.c
 
 // Subjects
 import { SubjectsIndexComponent } from './pages/subjects/subjects-index.component';
+import { CreateSubjectComponent } from './pages/subjects/create/create-subject.component';
 import { DetailsSubjectComponent } from './pages/subjects/details/details-subject.component';
 import { EditSubjectComponent } from './pages/subjects/edit/edit-subject.component';
 import { DeleteSubjectComponent } from './pages/subjects/delete/delete-subject.component';
@@ -58,6 +61,7 @@ export const routes: Routes = [
 
   // Subjects
   { path: 'subjects', component: SubjectsIndexComponent },
+  { path: 'subjects/create', component: CreateSubjectComponent },
   { path: 'subjects/details/:id', component: DetailsSubjectComponent },
   { path: 'subjects/edit/:id', component: EditSubjectComponent },
   { path: 'subjects/delete/:id', component: DeleteSubjectComponent },

@@ -1,18 +1,13 @@
 // src/pages/students/create/create-page.component.ts
 
+// src/pages/students/create/create-page.component.ts
+
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule, NgForm } from '@angular/forms';
-
-interface Student {
-  name: string;
-  email: string;
-  dateOfBirth: string;
-  enrollmentNumber: string;
-  phone: string;
-  address: string;
-}
+import { StudentService, StudentFormData } from '../../../services/student.service';
+import { Student } from '../../../types/student.model';
 
 @Component({
   selector: 'app-create-student',
@@ -22,7 +17,7 @@ interface Student {
   styleUrls: ['./create-page.component.css'],
 })
 export class CreateStudentComponent {
-  student: Student = {
+  student: StudentFormData = {
     name: '',
     email: '',
     dateOfBirth: '',
@@ -33,7 +28,10 @@ export class CreateStudentComponent {
 
   errors: Partial<Record<keyof Student, string>> = {};
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private studentService: StudentService
+  ) {}
 
   validate(): boolean {
     this.errors = {};
@@ -47,9 +45,10 @@ export class CreateStudentComponent {
   onSubmit(form: NgForm) {
     if (!this.validate()) return;
 
-    // Aqui você enviaria para API ou salvaria no mock
-    console.log('Aluno cadastrado:', this.student);
-    this.router.navigate(['/students']);
+    this.studentService.create(this.student).subscribe(() => {
+      alert('Aluno cadastrado com sucesso!');
+      this.router.navigate(['/students']);
+    });
   }
 
   goBack() {

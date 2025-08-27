@@ -1,47 +1,51 @@
 // src/pages/subjects/details/details-subject.component.ts
 
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
-
-interface Subject {
-  id: number;
-  name: string;
-  workloadHours: number;
-}
-
-// Mock de várias disciplinas
-const mockSubjects: Subject[] = [
-  { id: 1, name: 'Matemática', workloadHours: 60 },
-  { id: 2, name: 'Física', workloadHours: 60 },
-  { id: 3, name: 'Química', workloadHours: 60 },
-];
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { SubjectService } from '../../../services/subject.service';
+import { Subject } from '../../../types/subject.model';
 
 @Component({
   selector: 'app-details-subject',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './details-subject.component.html',
   styleUrls: ['./details-subject.component.css'],
 })
-export class DetailsSubjectComponent {
-  subject: Subject | undefined;
+export class DetailsSubjectComponent implements OnInit {
+  private subjectService = inject(SubjectService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
-  constructor(private route: ActivatedRoute, private router: Router) {
+  subject?: Subject;
+
+  ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('id');
     const subjectId = idParam ? Number(idParam) : null;
-    if (subjectId !== null) {
-      this.subject = mockSubjects.find(s => s.id === subjectId);
+    if (!subjectId) {
+      alert('ID inválido');
+      this.router.navigate(['/subjects']);
+      return;
     }
+
+    this.subjectService.getById(subjectId).subscribe(s => {
+      if (!s) {
+        alert('Disciplina não encontrada');
+        this.router.navigate(['/subjects']);
+        return;
+      }
+      this.subject = s;
+    });
   }
 
-  edit() {
+  edit(): void {
     if (this.subject) {
       this.router.navigate([`/subjects/edit/${this.subject.id}`]);
     }
   }
 
-  back() {
+  back(): void {
     this.router.navigate(['/subjects']);
   }
 }

@@ -2,6 +2,7 @@
 
 <div class="createContainer">
   <h1 class="title">Cadastrar Novo Aluno</h1>
+
   <form #studentForm="ngForm" (ngSubmit)="onSubmit(studentForm)">
     <div class="formGroup">
       <label for="name">Nome</label>
@@ -17,14 +18,26 @@
 
     <div class="formGroup">
       <label for="dateOfBirth">Data de Nascimento</label>
-      <input id="dateOfBirth" name="dateOfBirth" type="date" [(ngModel)]="student.dateOfBirth" />
+      <input
+        id="dateOfBirth"
+        name="dateOfBirth"
+        type="date"
+        [(ngModel)]="student.dateOfBirth"
+      />
       <span class="textDanger" *ngIf="errors.dateOfBirth">{{ errors.dateOfBirth }}</span>
     </div>
 
     <div class="formGroup">
       <label for="enrollmentNumber">Matrícula</label>
-      <input id="enrollmentNumber" name="enrollmentNumber" type="text" [(ngModel)]="student.enrollmentNumber" />
-      <span class="textDanger" *ngIf="errors.enrollmentNumber">{{ errors.enrollmentNumber }}</span>
+      <input
+        id="enrollmentNumber"
+        name="enrollmentNumber"
+        type="text"
+        [(ngModel)]="student.enrollmentNumber"
+      />
+      <span class="textDanger" *ngIf="errors.enrollmentNumber">
+        {{ errors.enrollmentNumber }}
+      </span>
     </div>
 
     <div class="formGroup">
@@ -37,8 +50,9 @@
       <input id="address" name="address" type="text" [(ngModel)]="student.address" />
     </div>
 
-    <button type="submit">Salvar</button>
+    <div class="formActions">
+      <button type="submit" class="btn btnPrimary">Salvar</button>
+      <button type="button" class="btn btnSecondary" (click)="goBack()">Voltar à Lista</button>
+    </div>
   </form>
-
-  <button class="btnSecondary" (click)="goBack()">Voltar à Lista</button>
 </div>

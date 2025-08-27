@@ -7,8 +7,6 @@ import { Router, RouterModule } from '@angular/router';
 import { TeacherService } from '../../services/teacher.service';
 import { Teacher } from '../../types/teacher.model';
 
-const PAGE_SIZE = 2;
-
 @Component({
   selector: 'app-teachers-page',
   standalone: true,
@@ -21,7 +19,6 @@ export class TeachersPageComponent implements OnInit {
   private router = inject(Router);
 
   searchTerm = '';
-  currentPage = 1;
   allTeachers: Teacher[] = [];
   filteredTeachers: Teacher[] = [];
   loading = true;
@@ -51,22 +48,6 @@ export class TeachersPageComponent implements OnInit {
           (t) => t.name.toLowerCase().includes(term) || t.subject.toLowerCase().includes(term)
         )
       : this.allTeachers;
-
-    this.currentPage = 1;
-  }
-
-  get totalPages(): number {
-    return Math.ceil(this.filteredTeachers.length / PAGE_SIZE) || 1;
-  }
-
-  get currentItems(): Teacher[] {
-    const start = (this.currentPage - 1) * PAGE_SIZE;
-    return this.filteredTeachers.slice(start, start + PAGE_SIZE);
-  }
-
-  goToPage(page: number): void {
-    if (page < 1 || page > this.totalPages) return;
-    this.currentPage = page;
   }
 
   onSearchChange(): void {

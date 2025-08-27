@@ -7,25 +7,29 @@
 
   <div class="formGroup">
     <label for="studentId">Aluno</label>
-    <input
+    <select
       id="studentId"
-      type="number"
-      [(ngModel)]="formData.studentId"
       name="studentId"
+      [(ngModel)]="formData.studentId"
       class="input"
-    />
+    >
+      <option value="">Selecione um aluno</option>
+      <option *ngFor="let s of students" [value]="s.id">{{ s.name }}</option>
+    </select>
     <span class="textDanger" *ngIf="errors.studentId">{{ errors.studentId }}</span>
   </div>
 
   <div class="formGroup">
     <label for="classRoomId">Turma</label>
-    <input
+    <select
       id="classRoomId"
-      type="number"
-      [(ngModel)]="formData.classRoomId"
       name="classRoomId"
+      [(ngModel)]="formData.classRoomId"
       class="input"
-    />
+    >
+      <option value="">Selecione uma turma</option>
+      <option *ngFor="let c of classRooms" [value]="c.id">{{ c.name }}</option>
+    </select>
     <span class="textDanger" *ngIf="errors.classRoomId">{{ errors.classRoomId }}</span>
   </div>
 

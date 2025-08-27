@@ -4,11 +4,8 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-
-interface Subject {
-  name: string;
-  description: string;
-}
+import { SubjectService } from '../../../services/subject.service';
+import { Subject } from '../../../types/subject.model';
 
 @Component({
   selector: 'app-create-subject',
@@ -18,13 +15,17 @@ interface Subject {
   styleUrls: ['./create-subject.component.css']
 })
 export class CreateSubjectComponent {
-  subject: Subject = { name: '', description: '' };
-  errors: { name?: string } = {};
+  subject: Omit<Subject, 'id'> = { name: '', description: '', workloadHours: 60 };
+  errors: { name?: string; workloadHours?: string } = {};
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private subjectService: SubjectService) {}
 
-  handleChange(field: keyof Subject, value: string) {
-    this.subject[field] = value;
+  handleChange<K extends keyof Omit<Subject, 'id'>>(field: K, value: string | number) {
+    if (field === 'workloadHours') {
+      this.subject[field] = Number(value) as any; // workloadHours é number
+    } else {
+      this.subject[field] = value as string as any; // name/description são strings
+    }
   }
 
   validate(): boolean {
@@ -32,12 +33,16 @@ export class CreateSubjectComponent {
     if (!this.subject.name.trim()) {
       this.errors.name = 'O nome da disciplina é obrigatório.';
     }
+    if (!this.subject.workloadHours || this.subject.workloadHours <= 0) {
+      this.errors.workloadHours = 'A carga horária deve ser maior que 0.';
+    }
     return Object.keys(this.errors).length === 0;
   }
 
   handleSubmit() {
     if (!this.validate()) return;
-    console.log('Salvar:', this.subject); // Aqui faria a chamada à API
+
+    this.subjectService.add(this.subject); // Salva via serviço
     this.router.navigate(['/subjects']);
   }
 

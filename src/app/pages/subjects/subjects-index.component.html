@@ -9,7 +9,7 @@
         placeholder="Digite o nome ou descrição..."
         [(ngModel)]="search"
         name="search"
-        (ngModelChange)="resetPage()"
+        class="searchInput"
       />
       <button class="btn btnPrimary">Buscar</button>
     </form>
@@ -29,7 +29,10 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let subject of paginated">
+        <tr *ngIf="filtered.length === 0">
+          <td colspan="4" style="text-align:center; padding:20px;">Nenhuma disciplina encontrada.</td>
+        </tr>
+        <tr *ngFor="let subject of filtered">
           <td>{{ subject.name }}</td>
           <td>{{ subject.description }}</td>
           <td>{{ subject.workloadHours }}</td>
@@ -41,11 +44,5 @@
         </tr>
       </tbody>
     </table>
-
-    <div class="pagination">
-      <button *ngIf="page > 1" (click)="goToPrevious()" class="pageLink">Anterior</button>
-      <span class="pageInfo">Página {{ page }} de {{ totalPages }}</span>
-      <button *ngIf="page < totalPages" (click)="goToNext()" class="pageLink">Próxima</button>
-    </div>
   </div>
 </div>

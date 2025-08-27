@@ -1,12 +1,12 @@
 <!-- src/pages/students/delete/delete-page.component.html -->
 
-<div class="container">
-  <h1 class="title">Excluir Aluno</h1>
+<div class="deleteContainer">
+  <h2 class="title">Excluir Aluno</h2>
   <p class="warning">
     Tem certeza que deseja excluir o aluno <strong>ID: {{ id }}</strong>?
   </p>
 
-  <div class="form">
+  <div class="actions">
     <button class="btnDelete" (click)="handleDelete()">Confirmar Exclusão</button>
     <button class="btnCancel" (click)="cancel()">Cancelar</button>
   </div>

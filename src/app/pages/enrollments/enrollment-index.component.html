@@ -4,7 +4,7 @@
   <div class="leftPanel">
     <h2 class="title">Buscar Matrículas</h2>
 
-    <form class="searchForm" (ngSubmit)="search()">
+    <form class="searchForm" (ngSubmit)="$event.preventDefault()">
       <input type="text" [(ngModel)]="searchString" name="searchString" placeholder="Buscar Matrícula ou Status..." />
       <button type="submit" class="btn btnPrimary">Buscar</button>
     </form>
@@ -26,7 +26,10 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let enrollment of data.items">
+        <tr *ngIf="filteredEnrollments.length === 0">
+          <td colspan="5" style="text-align:center; padding:20px;">Nenhuma matrícula encontrada.</td>
+        </tr>
+        <tr *ngFor="let enrollment of filteredEnrollments">
           <td>{{ getStudentName(enrollment.studentId) }}</td>
           <td>{{ getClassRoomName(enrollment.classRoomId) }}</td>
           <td>{{ enrollment.status }}</td>
@@ -39,11 +42,5 @@
         </tr>
       </tbody>
     </table>
-
-    <div class="pagination">
-      <button *ngIf="data.currentPage > 1" (click)="goToPage(data.currentPage - 1)" class="pageLink">Anterior</button>
-      <span class="pageInfo">Página {{ data.currentPage }} de {{ totalPages }}</span>
-      <button *ngIf="data.currentPage < totalPages" (click)="goToPage(data.currentPage + 1)" class="pageLink">Próxima</button>
-    </div>
   </div>
 </div>
