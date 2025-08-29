@@ -1,25 +1,27 @@
 <!-- src/pages/subjects/details/details-subject.component.html -->
 
-<h1 class="title">Detalhes da Disciplina</h1>
-
 <div *ngIf="subject; else notFound" class="container">
-  <dl class="row">
-    <dt>Nome</dt>
-    <dd>{{ subject.name }}</dd>
+  <h1 class="title">Detalhes da Disciplina</h1>
 
-    <dt>Carga Horária</dt>
-    <dd>{{ subject.workloadHours }} horas</dd>
-  </dl>
+  <div class="detailsRow">
+    <span class="detailsLabel">Nome:</span>
+    <span class="detailsValue">{{ subject.name }}</span>
+  </div>
+
+  <div class="detailsRow">
+    <span class="detailsLabel">Carga Horária:</span>
+    <span class="detailsValue">{{ subject.workloadHours }} horas</span>
+  </div>
+
+  <div class="actions">
+    <button class="btnWarning" (click)="edit()">Editar</button>
+    <button class="btnSecondary" (click)="back()">Voltar</button>
+  </div>
 </div>
 
 <ng-template #notFound>
   <div class="container">
     <h2>Disciplina não encontrada.</h2>
-    <button class="btn btnSecondary" (click)="back()">Voltar</button>
+    <button class="btnSecondary" (click)="back()">Voltar</button>
   </div>
 </ng-template>
-
-<div *ngIf="subject" class="actions">
-  <button class="btn btnWarning" (click)="edit()">Editar</button>
-  <button class="btn btnSecondary" (click)="back()">Voltar</button>
-</div>

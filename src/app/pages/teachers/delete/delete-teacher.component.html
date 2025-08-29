@@ -1,35 +1,37 @@
 <!-- src/pages/teachers/delete/delete-teacher.component.html -->
 
-<h1 class="title">Excluir Professor</h1>
+<div class="container">
+  <h1 class="title">Excluir Professor</h1>
 
-<div *ngIf="loading" class="loading">Carregando dados do professor...</div>
+  <div *ngIf="loading" class="loading">Carregando dados do professor...</div>
 
-<div *ngIf="!loading">
-  <h3 class="warning">Tem certeza que deseja excluir este professor?</h3>
+  <div *ngIf="!loading">
+    <h3 class="warning">Tem certeza que deseja excluir este professor?</h3>
 
-  <div class="infoBox" *ngIf="teacher">
-    <h4>{{ teacher.name }}</h4>
-    <p>E-mail: {{ teacher.email }}</p>
-    <p>Telefone: {{ teacher.phone }}</p>
-  </div>
+    <div class="infoBox" *ngIf="teacher">
+      <h4>{{ teacher.name }}</h4>
+      <p>E-mail: {{ teacher.email }}</p>
+      <p>Telefone: {{ teacher.phone }}</p>
+    </div>
 
-  <div class="actions">
-    <button
-      class="btn btnDanger"
-      type="button"
-      (click)="handleDelete()"
-      [disabled]="deleting"
-    >
-      {{ deleting ? 'Excluindo...' : 'Excluir' }}
-    </button>
+    <div class="form">
+      <button
+        class="btn btnDanger"
+        type="button"
+        (click)="handleDelete()"
+        [disabled]="deleting"
+      >
+        {{ deleting ? 'Excluindo...' : 'Excluir' }}
+      </button>
 
-    <button
-      class="btn btnSecondary"
-      type="button"
-      (click)="handleCancel()"
-      [disabled]="deleting"
-    >
-      Cancelar
-    </button>
+      <button
+        class="btn btnSecondary"
+        type="button"
+        (click)="handleCancel()"
+        [disabled]="deleting"
+      >
+        Cancelar
+      </button>
+    </div>
   </div>
 </div>

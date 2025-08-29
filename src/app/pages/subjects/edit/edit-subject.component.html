@@ -1,22 +1,36 @@
 <!-- src/pages/subjects/edit/edit-subject.component.html -->
 
-<h1 class="title">Editar Disciplina</h1>
+<div class="createContainer">
+  <h1 class="createTitle">Editar Disciplina</h1>
 
-<form (ngSubmit)="handleSubmit()" class="form">
-  <input type="hidden" name="id" [(ngModel)]="subject.id" />
+  <form (ngSubmit)="handleSubmit()" class="createForm">
+    <input type="hidden" name="id" [(ngModel)]="subject.id" />
 
-  <div class="formGroup">
-    <label for="name">Nome da Disciplina</label>
-    <input type="text" id="name" name="name" [(ngModel)]="subject.name" />
-    <span class="textDanger" *ngIf="errors.name">{{ errors.name }}</span>
-  </div>
+    <div class="formGroup">
+      <label for="name" class="formLabel">Nome da Disciplina</label>
+      <input
+        type="text"
+        id="name"
+        name="name"
+        [(ngModel)]="subject.name"
+        class="formInput"
+      />
+      <span *ngIf="errors.name" class="formError">{{ errors.name }}</span>
+    </div>
 
-  <div class="formGroup">
-    <label for="description">Descrição</label>
-    <textarea id="description" name="description" [(ngModel)]="subject.description"></textarea>
-  </div>
+    <div class="formGroup">
+      <label for="description" class="formLabel">Descrição</label>
+      <textarea
+        id="description"
+        name="description"
+        [(ngModel)]="subject.description"
+        class="formInput"
+      ></textarea>
+    </div>
 
-  <button type="submit">Salvar Alterações</button>
-</form>
-
-<button class="btnSecondary" (click)="back()">Voltar à Lista</button>
+    <div class="formActions">
+      <button type="submit" class="btnPrimary">Salvar Alterações</button>
+      <button type="button" class="btnSecondary" (click)="back()">Voltar à Lista</button>
+    </div>
+  </form>
+</div>

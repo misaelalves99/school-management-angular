@@ -1,46 +1,82 @@
 <!-- src/pages/students/edit/edit-page.component.html -->
 
-<!-- src/pages/students/edit/edit-page.component.html -->
+<div class="createContainer">
+  <h1 class="createTitle">Editar Aluno</h1>
 
-<h1 class="title">Editar Aluno</h1>
+  <form (ngSubmit)="handleSubmit()" class="createForm">
+    <div class="formGroup">
+      <label for="name" class="formLabel">Nome</label>
+      <input
+        id="name"
+        name="name"
+        [(ngModel)]="formData.name"
+        type="text"
+        class="formInput"
+      />
+      <span *ngIf="errors.name" class="formError">{{ errors.name }}</span>
+    </div>
 
-<form (ngSubmit)="handleSubmit()" class="form">
-  <div class="formGroup">
-    <label for="name">Nome</label>
-    <input id="name" name="name" [(ngModel)]="formData.name" type="text" />
-    <span class="textDanger" *ngIf="errors.name">{{ errors.name }}</span>
-  </div>
+    <div class="formGroup">
+      <label for="email" class="formLabel">Email</label>
+      <input
+        id="email"
+        name="email"
+        [(ngModel)]="formData.email"
+        type="email"
+        class="formInput"
+      />
+      <span *ngIf="errors.email" class="formError">{{ errors.email }}</span>
+    </div>
 
-  <div class="formGroup">
-    <label for="email">Email</label>
-    <input id="email" name="email" [(ngModel)]="formData.email" type="email" />
-    <span class="textDanger" *ngIf="errors.email">{{ errors.email }}</span>
-  </div>
+    <div class="formGroup">
+      <label for="dateOfBirth" class="formLabel">Data de Nascimento</label>
+      <input
+        id="dateOfBirth"
+        name="dateOfBirth"
+        [(ngModel)]="formData.dateOfBirth"
+        type="date"
+        class="formInput"
+      />
+      <span *ngIf="errors.dateOfBirth" class="formError">{{ errors.dateOfBirth }}</span>
+    </div>
 
-  <div class="formGroup">
-    <label for="dateOfBirth">Data de Nascimento</label>
-    <input id="dateOfBirth" name="dateOfBirth" [(ngModel)]="formData.dateOfBirth" type="date" />
-    <span class="textDanger" *ngIf="errors.dateOfBirth">{{ errors.dateOfBirth }}</span>
-  </div>
+    <div class="formGroup">
+      <label for="enrollmentNumber" class="formLabel">Matrícula</label>
+      <input
+        id="enrollmentNumber"
+        name="enrollmentNumber"
+        [(ngModel)]="formData.enrollmentNumber"
+        type="text"
+        class="formInput"
+      />
+      <span *ngIf="errors.enrollmentNumber" class="formError">{{ errors.enrollmentNumber }}</span>
+    </div>
 
-  <div class="formGroup">
-    <label for="enrollmentNumber">Matrícula</label>
-    <input id="enrollmentNumber" name="enrollmentNumber" [(ngModel)]="formData.enrollmentNumber" type="text" />
-    <span class="textDanger" *ngIf="errors.enrollmentNumber">{{ errors.enrollmentNumber }}</span>
-  </div>
+    <div class="formGroup">
+      <label for="phone" class="formLabel">Telefone</label>
+      <input
+        id="phone"
+        name="phone"
+        [(ngModel)]="formData.phone"
+        type="text"
+        class="formInput"
+      />
+    </div>
 
-  <div class="formGroup">
-    <label for="phone">Telefone</label>
-    <input id="phone" name="phone" [(ngModel)]="formData.phone" type="text" />
-  </div>
+    <div class="formGroup">
+      <label for="address" class="formLabel">Endereço</label>
+      <input
+        id="address"
+        name="address"
+        [(ngModel)]="formData.address"
+        type="text"
+        class="formInput"
+      />
+    </div>
 
-  <div class="formGroup">
-    <label for="address">Endereço</label>
-    <input id="address" name="address" [(ngModel)]="formData.address" type="text" />
-  </div>
-
-  <div class="actions">
-    <button type="submit" class="btnPrimary">Salvar Alterações</button>
-    <button type="button" class="btnSecondary" (click)="cancel()">Voltar</button>
-  </div>
-</form>
+    <div class="formActions">
+      <button type="submit" class="btnPrimary">Salvar Alterações</button>
+      <button type="button" class="btnSecondary" (click)="cancel()">Voltar</button>
+    </div>
+  </form>
+</div>

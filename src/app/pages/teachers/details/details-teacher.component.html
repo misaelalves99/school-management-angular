@@ -1,22 +1,40 @@
 <!-- src/pages/teachers/details/details-teacher.component.html -->
 
-<h1 class="title">Detalhes do Professor</h1>
 <div class="container" *ngIf="teacher">
-  <img
-    *ngIf="teacher.photoUrl"
-    [src]="teacher.photoUrl"
-    [alt]="teacher.name + ' foto'"
-    class="profile-photo"
-  />
-  <div><strong>Nome:</strong> {{ teacher.name }}</div>
-  <div><strong>Email:</strong> {{ teacher.email }}</div>
-  <div><strong>Data de Nascimento:</strong> {{ formattedDate }}</div>
-  <div><strong>Disciplina:</strong> {{ teacher.subject }}</div>
-  <div><strong>Telefone:</strong> {{ teacher.phone }}</div>
-  <div><strong>Endereço:</strong> {{ teacher.address }}</div>
+  <h1 class="title">Detalhes do Professor</h1>
+
+  <div class="detailsRow">
+    <span class="detailsLabel">Nome:</span>
+    <span class="detailsValue">{{ teacher.name }}</span>
+  </div>
+
+  <div class="detailsRow">
+    <span class="detailsLabel">Email:</span>
+    <span class="detailsValue">{{ teacher.email }}</span>
+  </div>
+
+  <div class="detailsRow">
+    <span class="detailsLabel">Data de Nascimento:</span>
+    <span class="detailsValue">{{ formattedDate }}</span>
+  </div>
+
+  <div class="detailsRow">
+    <span class="detailsLabel">Disciplina:</span>
+    <span class="detailsValue">{{ teacher.subject }}</span>
+  </div>
+
+  <div class="detailsRow">
+    <span class="detailsLabel">Telefone:</span>
+    <span class="detailsValue">{{ teacher.phone }}</span>
+  </div>
+
+  <div class="detailsRow">
+    <span class="detailsLabel">Endereço:</span>
+    <span class="detailsValue">{{ teacher.address }}</span>
+  </div>
 
   <div class="actions">
-    <button class="btn btn-warning" (click)="editTeacher()">Editar</button>
-    <button class="btn btn-secondary" (click)="goBack()">Voltar à Lista</button>
+    <button class="btnWarning" (click)="editTeacher()">Editar</button>
+    <button class="btnSecondary" (click)="goBack()">Voltar à Lista</button>
   </div>
 </div>

@@ -1,51 +1,54 @@
 <!-- src/pages/enrollments/edit/edit-enrollment.component.html -->
 
-<h1 class="title">Editar Matrícula</h1>
+<div class="createContainer">
+  <h1 class="createTitle">Editar Matrícula</h1>
 
-<form (ngSubmit)="handleSubmit()" class="form">
-  <input type="hidden" [value]="formData.id" />
+  <form (ngSubmit)="handleSubmit()" class="createForm">
+    <input type="hidden" [value]="formData.id" />
 
-  <div class="formGroup">
-    <label for="studentId">Aluno</label>
-    <select
-      id="studentId"
-      name="studentId"
-      [(ngModel)]="formData.studentId"
-      class="input"
-    >
-      <option value="">Selecione um aluno</option>
-      <option *ngFor="let s of students" [value]="s.id">{{ s.name }}</option>
-    </select>
-    <span class="textDanger" *ngIf="errors.studentId">{{ errors.studentId }}</span>
-  </div>
+    <div class="formGroup">
+      <label for="studentId" class="formLabel">Aluno</label>
+      <select
+        id="studentId"
+        name="studentId"
+        [(ngModel)]="formData.studentId"
+        class="formInput"
+      >
+        <option value="">Selecione um aluno</option>
+        <option *ngFor="let s of students" [value]="s.id">{{ s.name }}</option>
+      </select>
+      <span *ngIf="errors.studentId" class="formError">{{ errors.studentId }}</span>
+    </div>
 
-  <div class="formGroup">
-    <label for="classRoomId">Turma</label>
-    <select
-      id="classRoomId"
-      name="classRoomId"
-      [(ngModel)]="formData.classRoomId"
-      class="input"
-    >
-      <option value="">Selecione uma turma</option>
-      <option *ngFor="let c of classRooms" [value]="c.id">{{ c.name }}</option>
-    </select>
-    <span class="textDanger" *ngIf="errors.classRoomId">{{ errors.classRoomId }}</span>
-  </div>
+    <div class="formGroup">
+      <label for="classRoomId" class="formLabel">Turma</label>
+      <select
+        id="classRoomId"
+        name="classRoomId"
+        [(ngModel)]="formData.classRoomId"
+        class="formInput"
+      >
+        <option value="">Selecione uma turma</option>
+        <option *ngFor="let c of classRooms" [value]="c.id">{{ c.name }}</option>
+      </select>
+      <span *ngIf="errors.classRoomId" class="formError">{{ errors.classRoomId }}</span>
+    </div>
 
-  <div class="formGroup">
-    <label for="enrollmentDate">Data da Matrícula</label>
-    <input
-      id="enrollmentDate"
-      type="date"
-      [(ngModel)]="formData.enrollmentDate"
-      name="enrollmentDate"
-      class="input"
-    />
-    <span class="textDanger" *ngIf="errors.enrollmentDate">{{ errors.enrollmentDate }}</span>
-  </div>
+    <div class="formGroup">
+      <label for="enrollmentDate" class="formLabel">Data da Matrícula</label>
+      <input
+        id="enrollmentDate"
+        type="date"
+        name="enrollmentDate"
+        [(ngModel)]="formData.enrollmentDate"
+        class="formInput"
+      />
+      <span *ngIf="errors.enrollmentDate" class="formError">{{ errors.enrollmentDate }}</span>
+    </div>
 
-  <button type="submit" class="btnSubmit">Salvar Alterações</button>
-</form>
-
-<button class="btnSecondary" (click)="back()">Voltar à Lista</button>
+    <div class="formActions">
+      <button type="submit" class="btnPrimary">Salvar Alterações</button>
+      <button type="button" class="btnSecondary" (click)="back()">Voltar à Lista</button>
+    </div>
+  </form>
+</div>

@@ -3,12 +3,35 @@
 <div class="container">
   <h1 class="title">Detalhes do Aluno</h1>
 
-  <div><strong>Nome:</strong> {{ student.name }}</div>
-  <div><strong>Email:</strong> {{ student.email }}</div>
-  <div><strong>Data de Nascimento:</strong> {{ student.dateOfBirth }}</div>
-  <div><strong>Número de Matrícula:</strong> {{ student.enrollmentNumber }}</div>
-  <div><strong>Telefone:</strong> {{ student.phone }}</div>
-  <div><strong>Endereço:</strong> {{ student.address }}</div>
+  <div class="detailsRow">
+    <span class="detailsLabel">Nome:</span>
+    <span class="detailsValue">{{ student.name }}</span>
+  </div>
+
+  <div class="detailsRow">
+    <span class="detailsLabel">Email:</span>
+    <span class="detailsValue">{{ student.email }}</span>
+  </div>
+
+  <div class="detailsRow">
+    <span class="detailsLabel">Data de Nascimento:</span>
+    <span class="detailsValue">{{ student.dateOfBirth }}</span>
+  </div>
+
+  <div class="detailsRow">
+    <span class="detailsLabel">Número de Matrícula:</span>
+    <span class="detailsValue">{{ student.enrollmentNumber }}</span>
+  </div>
+
+  <div class="detailsRow">
+    <span class="detailsLabel">Telefone:</span>
+    <span class="detailsValue">{{ student.phone }}</span>
+  </div>
+
+  <div class="detailsRow">
+    <span class="detailsLabel">Endereço:</span>
+    <span class="detailsValue">{{ student.address }}</span>
+  </div>
 
   <div class="actions">
     <button class="btnWarning" (click)="edit()">Editar</button>

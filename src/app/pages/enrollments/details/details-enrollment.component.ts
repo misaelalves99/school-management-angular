@@ -2,7 +2,7 @@
 
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 
 export interface EnrollmentDetails {
   id: number;
@@ -15,12 +15,18 @@ export interface EnrollmentDetails {
 @Component({
   selector: 'app-details-enrollment',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './details-enrollment.component.html',
   styleUrls: ['./details-enrollment.component.css'],
 })
 export class DetailsEnrollmentComponent {
-  @Input() enrollment!: EnrollmentDetails;
+  @Input() enrollment: EnrollmentDetails = {
+    id: 0,
+    studentName: null,
+    classRoomName: null,
+    status: null,
+    enrollmentDate: new Date().toISOString(),
+  };
 
   constructor(private router: Router) {}
 

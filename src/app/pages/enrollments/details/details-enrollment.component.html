@@ -1,24 +1,34 @@
 <!-- src/pages/enrollments/details/details-enrollment.component.html -->
 
-<h1 class="title">Detalhes da Matrícula</h1>
+<div class="container" *ngIf="enrollment; else loading">
+  <h1 class="title">Detalhes da Matrícula</h1>
 
-<div class="detailsContainer">
-  <dl class="dlRow">
-    <dt class="dt">Aluno</dt>
-    <dd class="dd">{{ enrollment.studentName ?? 'Aluno não informado' }}</dd>
+  <div class="detailsRow">
+    <span class="detailsLabel">Aluno:</span>
+    <span class="detailsValue">{{ enrollment.studentName ?? 'Aluno não informado' }}</span>
+  </div>
 
-    <dt class="dt">Turma</dt>
-    <dd class="dd">{{ enrollment.classRoomName ?? 'Turma não informada' }}</dd>
+  <div class="detailsRow">
+    <span class="detailsLabel">Turma:</span>
+    <span class="detailsValue">{{ enrollment.classRoomName ?? 'Turma não informada' }}</span>
+  </div>
 
-    <dt class="dt">Status</dt>
-    <dd class="dd">{{ enrollment.status ?? '-' }}</dd>
+  <div class="detailsRow">
+    <span class="detailsLabel">Status:</span>
+    <span class="detailsValue">{{ enrollment.status ?? '-' }}</span>
+  </div>
 
-    <dt class="dt">Data da Matrícula</dt>
-    <dd class="dd">{{ enrollment.enrollmentDate | date:'shortDate' }}</dd>
-  </dl>
+  <div class="detailsRow">
+    <span class="detailsLabel">Data da Matrícula:</span>
+    <span class="detailsValue">{{ enrollment.enrollmentDate | date:'shortDate' }}</span>
+  </div>
+
+  <div class="actions">
+    <button type="button" class="btnWarning" (click)="edit()">Editar</button>
+    <button type="button" class="btnSecondary" (click)="back()">Voltar</button>
+  </div>
 </div>
 
-<div>
-  <button class="btn btnWarning" (click)="edit()">Editar</button>
-  <button class="btn btnSecondary" (click)="back()">Voltar</button>
-</div>
+<ng-template #loading>
+  <p>Carregando...</p>
+</ng-template>

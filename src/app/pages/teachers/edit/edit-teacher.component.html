@@ -2,53 +2,53 @@
  
 <div *ngIf="loading">Carregando...</div>
 
-<div *ngIf="!loading">
-  <h1 class="title">Editar Professor</h1>
-  <form (ngSubmit)="handleSubmit()" class="form">
-    <div class="edit-container">
-      <!-- Nome -->
-      <div class="form-group">
-        <label for="name">Nome</label>
-        <input id="name" name="name" type="text" [(ngModel)]="formData.name" />
-        <span class="text-danger" *ngIf="errors.name">{{ errors.name }}</span>
-      </div>
+<div *ngIf="!loading" class="createContainer">
+  <h1 class="createTitle">Editar Professor</h1>
 
-      <!-- Email -->
-      <div class="form-group">
-        <label for="email">Email</label>
-        <input id="email" name="email" type="email" [(ngModel)]="formData.email" />
-        <span class="text-danger" *ngIf="errors.email">{{ errors.email }}</span>
-      </div>
+  <form (ngSubmit)="handleSubmit()" class="createForm">
+    <!-- Nome -->
+    <div class="formGroup">
+      <label for="name" class="formLabel">Nome</label>
+      <input id="name" name="name" type="text" [(ngModel)]="formData.name" class="formInput" />
+      <span class="formError" *ngIf="errors.name">{{ errors.name }}</span>
+    </div>
 
-      <!-- Data de Nascimento -->
-      <div class="form-group">
-        <label for="dateOfBirth">Data de Nascimento</label>
-        <input id="dateOfBirth" name="dateOfBirth" type="date" [(ngModel)]="formData.dateOfBirth" />
-        <span class="text-danger" *ngIf="errors.dateOfBirth">{{ errors.dateOfBirth }}</span>
-      </div>
+    <!-- Email -->
+    <div class="formGroup">
+      <label for="email" class="formLabel">Email</label>
+      <input id="email" name="email" type="email" [(ngModel)]="formData.email" class="formInput" />
+      <span class="formError" *ngIf="errors.email">{{ errors.email }}</span>
+    </div>
 
-      <!-- Disciplina -->
-      <div class="form-group">
-        <label for="subject">Disciplina</label>
-        <input id="subject" name="subject" type="text" [(ngModel)]="formData.subject" />
-        <span class="text-danger" *ngIf="errors.subject">{{ errors.subject }}</span>
-      </div>
+    <!-- Data de Nascimento -->
+    <div class="formGroup">
+      <label for="dateOfBirth" class="formLabel">Data de Nascimento</label>
+      <input id="dateOfBirth" name="dateOfBirth" type="date" [(ngModel)]="formData.dateOfBirth" class="formInput" />
+      <span class="formError" *ngIf="errors.dateOfBirth">{{ errors.dateOfBirth }}</span>
+    </div>
 
-      <!-- Telefone -->
-      <div class="form-group">
-        <label for="phone">Telefone</label>
-        <input id="phone" name="phone" type="tel" [(ngModel)]="formData.phone" />
-      </div>
+    <!-- Disciplina -->
+    <div class="formGroup">
+      <label for="subject" class="formLabel">Disciplina</label>
+      <input id="subject" name="subject" type="text" [(ngModel)]="formData.subject" class="formInput" />
+      <span class="formError" *ngIf="errors.subject">{{ errors.subject }}</span>
+    </div>
 
-      <!-- Endereço -->
-      <div class="form-group">
-        <label for="address">Endereço</label>
-        <input id="address" name="address" type="text" [(ngModel)]="formData.address" />
-      </div>
+    <!-- Telefone -->
+    <div class="formGroup">
+      <label for="phone" class="formLabel">Telefone</label>
+      <input id="phone" name="phone" type="tel" [(ngModel)]="formData.phone" class="formInput" />
+    </div>
 
-      <button type="submit">Salvar</button>
+    <!-- Endereço -->
+    <div class="formGroup">
+      <label for="address" class="formLabel">Endereço</label>
+      <input id="address" name="address" type="text" [(ngModel)]="formData.address" class="formInput" />
+    </div>
+
+    <div class="formActions">
+      <button type="submit" class="btnPrimary">Salvar</button>
+      <button type="button" class="btnSecondary" (click)="goBack()">Voltar à Lista</button>
     </div>
   </form>
-
-  <button class="btn-secondary" type="button" (click)="goBack()">Voltar à Lista</button>
 </div>

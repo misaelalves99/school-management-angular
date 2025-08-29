@@ -1,43 +1,48 @@
 <!-- /src/pages/class-rooms/create/create-classroom.component.html -->
 
-<div class="create-container">
-  <h1>Criar Sala</h1>
+<div class="createContainer">
+  <h1 class="createTitle">Criar Sala</h1>
 
-  <form (ngSubmit)="handleSubmit()" #classroomForm="ngForm">
-    <div class="form-group">
-      <label for="name">Nome</label>
+  <form #classroomForm="ngForm" (ngSubmit)="handleSubmit()" class="createForm">
+    <div class="formGroup">
+      <label for="name" class="formLabel">Nome</label>
       <input
         type="text"
         id="name"
         name="name"
         [(ngModel)]="name"
         required
+        class="formInput"
       />
     </div>
 
-    <div class="form-group">
-      <label for="capacity">Capacidade</label>
+    <div class="formGroup">
+      <label for="capacity" class="formLabel">Capacidade</label>
       <input
         type="number"
         id="capacity"
         name="capacity"
         [(ngModel)]="capacity"
         required
+        class="formInput"
       />
     </div>
 
-    <div class="form-group">
-      <label for="schedule">Horário</label>
+    <div class="formGroup">
+      <label for="schedule" class="formLabel">Horário</label>
       <input
         type="text"
         id="schedule"
         name="schedule"
         [(ngModel)]="schedule"
         required
+        class="formInput"
       />
     </div>
 
-    <button type="submit">Criar Sala</button>
-    <button type="button" class="btn-secondary" (click)="cancel()">Cancelar</button>
+    <div class="formActions">
+      <button type="submit" class="btnPrimary">Criar Sala</button>
+      <button type="button" class="btnSecondary" (click)="cancel()">Cancelar</button>
+    </div>
   </form>
 </div>

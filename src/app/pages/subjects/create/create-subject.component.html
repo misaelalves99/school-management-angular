@@ -1,33 +1,35 @@
 <!-- src/pages/subjects/create/create-subject.component.html -->
 
-<h1 class="title">Cadastrar Nova Disciplina</h1>
+<div class="createContainer">
+  <h1 class="createTitle">Cadastrar Nova Disciplina</h1>
 
-<form (ngSubmit)="handleSubmit()" class="form">
-  <div class="createContainer">
+  <form (ngSubmit)="handleSubmit()" class="createForm">
     <div class="formGroup">
-      <label for="name">Nome da Disciplina</label>
+      <label for="name" class="formLabel">Nome da Disciplina</label>
       <input
         type="text"
         id="name"
         name="name"
         [(ngModel)]="subject.name"
         (ngModelChange)="handleChange('name', $event)"
+        class="formInput"
       />
-      <span *ngIf="errors.name" class="textDanger">{{ errors.name }}</span>
+      <span *ngIf="errors.name" class="formError">{{ errors.name }}</span>
     </div>
 
     <div class="formGroup">
-      <label for="description">Descrição</label>
+      <label for="description" class="formLabel">Descrição</label>
       <textarea
         id="description"
         name="description"
         [(ngModel)]="subject.description"
         (ngModelChange)="handleChange('description', $event)"
+        class="formInput"
       ></textarea>
     </div>
 
     <div class="formGroup">
-      <label for="workloadHours">Carga Horária (horas)</label>
+      <label for="workloadHours" class="formLabel">Carga Horária (horas)</label>
       <input
         type="number"
         id="workloadHours"
@@ -35,12 +37,14 @@
         [(ngModel)]="subject.workloadHours"
         (ngModelChange)="handleChange('workloadHours', $event)"
         min="1"
+        class="formInput"
       />
-      <span *ngIf="errors.workloadHours" class="textDanger">{{ errors.workloadHours }}</span>
+      <span *ngIf="errors.workloadHours" class="formError">{{ errors.workloadHours }}</span>
     </div>
 
-    <button type="submit">Salvar</button>
-  </div>
-</form>
-
-<button class="btnSecondary" type="button" (click)="goBack()">Voltar à Lista</button>
+    <div class="formActions">
+      <button type="submit" class="btnPrimary">Salvar</button>
+      <button type="button" class="btnSecondary" (click)="goBack()">Voltar à Lista</button>
+    </div>
+  </form>
+</div>
