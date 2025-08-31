@@ -4,6 +4,8 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { Subject } from '../types/subject.model';
 
+export type SubjectFormData = Omit<Subject, 'id'>;
+
 @Injectable({
   providedIn: 'root',
 })
@@ -19,24 +21,28 @@ export class SubjectService {
   private subjectsSubject = new BehaviorSubject<Subject[]>(this.initialSubjects);
   subjects$ = this.subjectsSubject.asObservable();
 
+  /** Lista todas as disciplinas */
   getAll(): Observable<Subject[]> {
     return this.subjects$;
   }
 
+  /** Busca disciplina pelo ID */
   getById(id: number): Observable<Subject | undefined> {
     const subject = this.subjectsSubject.getValue().find(s => s.id === id);
     return of(subject);
   }
 
-  add(subject: Omit<Subject, 'id'>): void {
+  /** Adiciona nova disciplina */
+  add(data: SubjectFormData): void {
     const current = this.subjectsSubject.getValue();
     const newSubject: Subject = {
-      ...subject,
+      ...data,
       id: current.length > 0 ? Math.max(...current.map(s => s.id)) + 1 : 1,
     };
     this.subjectsSubject.next([...current, newSubject]);
   }
 
+  /** Atualiza disciplina existente */
   update(subject: Subject): void {
     const current = this.subjectsSubject.getValue();
     const index = current.findIndex(s => s.id === subject.id);
@@ -46,8 +52,14 @@ export class SubjectService {
     }
   }
 
+  /** Deleta disciplina pelo ID */
   delete(id: number): void {
     const current = this.subjectsSubject.getValue();
     this.subjectsSubject.next(current.filter(s => s.id !== id));
+  }
+
+  /** Retorna snapshot atual (útil para selects e filtros rápidos) */
+  snapshot(): Subject[] {
+    return this.subjectsSubject.getValue();
   }
 }

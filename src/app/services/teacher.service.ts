@@ -1,8 +1,10 @@
 // src/services/teacher.service.ts
+
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { Teacher } from '../types/teacher.model';
-import { TeacherFormData } from '../types/teacher.model';
+
+export type TeacherFormData = Omit<Teacher, 'id'>;
 
 const initialTeachers: Teacher[] = [
   {
@@ -34,25 +36,29 @@ export class TeacherService {
   private teachersSubject = new BehaviorSubject<Teacher[]>(initialTeachers);
   teachers$ = this.teachersSubject.asObservable();
 
+  /** Lista todos os professores */
   getAll(): Observable<Teacher[]> {
     return this.teachers$;
   }
 
+  /** Busca professor pelo ID */
   getById(id: number): Observable<Teacher | undefined> {
     const teacher = this.teachersSubject.getValue().find(t => t.id === id);
     return of(teacher);
   }
 
+  /** Cria um novo professor */
   create(data: TeacherFormData): Observable<Teacher> {
     const current = this.teachersSubject.getValue();
     const newTeacher: Teacher = {
       ...data,
-      id: Math.max(0, ...current.map(t => t.id)) + 1,
+      id: current.length > 0 ? Math.max(...current.map(t => t.id)) + 1 : 1,
     };
     this.teachersSubject.next([...current, newTeacher]);
     return of(newTeacher);
   }
 
+  /** Atualiza um professor existente */
   update(id: number, updated: Partial<Teacher>): Observable<Teacher | null> {
     const current = this.teachersSubject.getValue();
     const index = current.findIndex(t => t.id === id);
@@ -63,9 +69,15 @@ export class TeacherService {
     return of(current[index]);
   }
 
+  /** Deleta professor pelo ID */
   delete(id: number): Observable<void> {
     const current = this.teachersSubject.getValue();
     this.teachersSubject.next(current.filter(t => t.id !== id));
     return of(void 0);
+  }
+
+  /** Retorna snapshot atual (útil para selects e filtros) */
+  snapshot(): Teacher[] {
+    return this.teachersSubject.getValue();
   }
 }

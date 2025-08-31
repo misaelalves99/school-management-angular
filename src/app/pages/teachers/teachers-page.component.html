@@ -29,8 +29,8 @@
     <table class="table" aria-label="Lista de professores">
       <thead>
         <tr>
+          <th>ID</th> <!-- Alterado para ID -->
           <th>Nome</th>
-          <th>Email</th>
           <th>Disciplina</th>
           <th>Ações</th>
         </tr>
@@ -40,8 +40,8 @@
           <td colspan="4" style="text-align:center; padding:20px;">Nenhum professor encontrado.</td>
         </tr>
         <tr *ngFor="let teacher of filteredTeachers">
+          <td>{{ teacher.id }}</td> <!-- Mostra o ID -->
           <td>{{ teacher.name }}</td>
-          <td>{{ teacher.email }}</td>
           <td>{{ teacher.subject }}</td>
           <td>
             <button class="btn btnInfo" (click)="navigateTo('/teachers/details/' + teacher.id)">

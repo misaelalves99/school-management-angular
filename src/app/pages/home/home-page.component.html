@@ -1,27 +1,27 @@
 <!-- src/pages/home/home-page.component.html -->
 
 <div class="container">
-  <h1>Bem-vindo ao Sistema</h1>
-  <p class="lead">Gerencie seus alunos, turmas e matrículas de forma simples e rápida.</p>
+  <h1 class="title">Bem-vindo ao Sistema de Gestão Escolar</h1>
+  <p class="lead">
+    Gerencie facilmente alunos, professores, disciplinas, matrículas,
+    presenças e notas em um único lugar.
+  </p>
 
   <ul class="features">
-    <li class="feature-card">
-      <a routerLink="/students">Alunos</a>
+    <li class="featureCard">
+      <a routerLink="/students" class="cardLink">Gerenciar Alunos</a>
     </li>
-    <li class="feature-card">
-      <a routerLink="/classrooms">Turmas</a>
+    <li class="featureCard">
+      <a routerLink="/teachers" class="cardLink">Gerenciar Professores</a>
     </li>
-    <li class="feature-card">
-      <a routerLink="/enrollments">Matrículas</a>
+    <li class="featureCard">
+      <a routerLink="/subjects" class="cardLink">Gerenciar Disciplinas</a>
     </li>
-    <li class="feature-card">
-      <a routerLink="/teachers">Professores</a>
+    <li class="featureCard">
+      <a routerLink="/classrooms" class="cardLink">Gerenciar Salas</a>
     </li>
-    <li class="feature-card">
-      <a routerLink="/subjects">Disciplinas</a>
-    </li>
-    <li class="feature-card">
-      <a routerLink="/rooms">Salas</a>
+    <li class="featureCard">
+      <a routerLink="/enrollments" class="cardLink">Gerenciar Matrículas</a>
     </li>
   </ul>
 </div>

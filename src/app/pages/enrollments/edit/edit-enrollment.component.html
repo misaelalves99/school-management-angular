@@ -6,49 +6,47 @@
   <form (ngSubmit)="handleSubmit()" class="createForm">
     <input type="hidden" [value]="formData.id" />
 
+    <!-- Aluno -->
     <div class="formGroup">
       <label for="studentId" class="formLabel">Aluno</label>
-      <select
-        id="studentId"
-        name="studentId"
-        [(ngModel)]="formData.studentId"
-        class="formInput"
-      >
+      <select id="studentId" name="studentId" [(ngModel)]="formData.studentId" class="formInput">
         <option value="">Selecione um aluno</option>
         <option *ngFor="let s of students" [value]="s.id">{{ s.name }}</option>
       </select>
       <span *ngIf="errors.studentId" class="formError">{{ errors.studentId }}</span>
     </div>
 
+    <!-- Turma -->
     <div class="formGroup">
       <label for="classRoomId" class="formLabel">Turma</label>
-      <select
-        id="classRoomId"
-        name="classRoomId"
-        [(ngModel)]="formData.classRoomId"
-        class="formInput"
-      >
+      <select id="classRoomId" name="classRoomId" [(ngModel)]="formData.classRoomId" class="formInput">
         <option value="">Selecione uma turma</option>
         <option *ngFor="let c of classRooms" [value]="c.id">{{ c.name }}</option>
       </select>
       <span *ngIf="errors.classRoomId" class="formError">{{ errors.classRoomId }}</span>
     </div>
 
+    <!-- Data da Matrícula -->
     <div class="formGroup">
       <label for="enrollmentDate" class="formLabel">Data da Matrícula</label>
-      <input
-        id="enrollmentDate"
-        type="date"
-        name="enrollmentDate"
-        [(ngModel)]="formData.enrollmentDate"
-        class="formInput"
-      />
+      <input id="enrollmentDate" type="date" name="enrollmentDate" [(ngModel)]="formData.enrollmentDate" class="formInput" />
       <span *ngIf="errors.enrollmentDate" class="formError">{{ errors.enrollmentDate }}</span>
+    </div>
+
+    <!-- Status -->
+    <div class="formGroup">
+      <label for="status" class="formLabel">Status</label>
+      <select id="status" name="status" [(ngModel)]="formData.status" class="formInput">
+        <option value="">Selecione o status</option>
+        <option value="Ativo">Ativo</option>
+        <option value="Inativo">Inativo</option>
+      </select>
+      <span *ngIf="errors.status" class="formError">{{ errors.status }}</span>
     </div>
 
     <div class="formActions">
       <button type="submit" class="btnPrimary">Salvar Alterações</button>
-      <button type="button" class="btnSecondary" (click)="back()">Voltar à Lista</button>
+      <button type="button" class="btnSecondary" (click)="back()">Voltar</button>
     </div>
   </form>
 </div>

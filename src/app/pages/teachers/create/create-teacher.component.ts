@@ -1,19 +1,13 @@
 // src/pages/teachers/create/create-teacher.component.ts
 
-import { Component, inject } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { TeacherService } from '../../../services/teacher.service';
-
-export interface TeacherFormData {
-  name: string;
-  email: string;
-  dateOfBirth: string;
-  subject: string;
-  phone: string;
-  address: string;
-}
+import { SubjectService } from '../../../services/subject.service';
+import { Subject } from '../../../types/subject.model';
+import { TeacherFormData } from '../../../types/teacher.model';
 
 @Component({
   selector: 'app-create-teacher',
@@ -22,11 +16,15 @@ export interface TeacherFormData {
   templateUrl: './create-teacher.component.html',
   styleUrls: ['./create-teacher.component.css'],
 })
-export class CreateTeacherComponent {
-  private teacherService = inject(TeacherService);
-  private router = inject(Router);
-
-  formData: TeacherFormData = {
+export class CreateTeacherComponent implements OnInit {
+  formData: {
+    name: string;
+    email: string;
+    dateOfBirth: string;
+    subject: string;
+    phone: string;
+    address: string;
+  } = {
     name: '',
     email: '',
     dateOfBirth: '',
@@ -35,42 +33,63 @@ export class CreateTeacherComponent {
     address: '',
   };
 
-  errors: Partial<Record<keyof TeacherFormData, string>> = {};
+  errors: Partial<Record<keyof typeof this.formData, string>> = {};
 
-  // Definindo os campos no TS para evitar problemas de indexação
-  fields: { label: string; name: keyof TeacherFormData; type: string }[] = [
-    { label: 'Nome', name: 'name', type: 'text' },
-    { label: 'Email', name: 'email', type: 'email' },
-    { label: 'Data de Nascimento', name: 'dateOfBirth', type: 'date' },
-    { label: 'Disciplina', name: 'subject', type: 'text' },
-    { label: 'Telefone', name: 'phone', type: 'tel' },
-    { label: 'Endereço', name: 'address', type: 'text' },
-  ];
+  subjects: Subject[] = [];
+
+  constructor(
+    private teacherService: TeacherService,
+    private subjectService: SubjectService,
+    private router: Router
+  ) {}
+
+  ngOnInit(): void {
+    this.loadSubjects();
+  }
+
+  loadSubjects() {
+    this.subjectService.getAll().subscribe((data) => {
+      this.subjects = data;
+    });
+  }
 
   validate(): boolean {
-    const newErrors: Partial<Record<keyof TeacherFormData, string>> = {};
+    const newErrors: Partial<Record<keyof typeof this.formData, string>> = {};
 
     if (!this.formData.name.trim()) newErrors.name = 'Nome é obrigatório.';
     if (!this.formData.email.trim()) newErrors.email = 'Email é obrigatório.';
     else if (!/\S+@\S+\.\S+/.test(this.formData.email)) newErrors.email = 'Email inválido.';
     if (!this.formData.dateOfBirth) newErrors.dateOfBirth = 'Data de nascimento é obrigatória.';
-    if (!this.formData.subject.trim()) newErrors.subject = 'Disciplina é obrigatória.';
+    if (!this.formData.subject) newErrors.subject = 'Disciplina é obrigatória.';
 
     this.errors = newErrors;
     return Object.keys(newErrors).length === 0;
   }
 
-  handleSubmit(): void {
+  handleSubmit() {
     if (!this.validate()) return;
 
-    this.teacherService.create(this.formData).subscribe({
+    const subjectId = Number(this.formData.subject);
+    const payload: TeacherFormData = {
+      ...this.formData,
+      subject: this.getSubjectName(subjectId),
+    };
+
+    this.teacherService.create(payload).subscribe({
       next: () => {
-        alert('Professor salvo com sucesso!');
+        alert('Professor cadastrado com sucesso!');
         this.router.navigate(['/teachers']);
       },
-      error: (err) => {
-        alert('Erro ao salvar professor: ' + err.message);
-      },
+      error: (err) => alert('Erro ao cadastrar professor: ' + err.message),
     });
+  }
+
+  getSubjectName(id: number): string {
+    const subj = this.subjects.find((s) => s.id === id);
+    return subj ? subj.name : '';
+  }
+
+  goBack() {
+    this.router.navigate(['/teachers']);
   }
 }

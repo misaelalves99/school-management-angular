@@ -1,21 +1,24 @@
 // src/services/classroom.service.ts
-
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { ClassRoom } from '../types/classroom.model';
 import { Teacher } from '../types/teacher.model';
 import { Subject } from '../types/subject.model';
 
+/** Dados para criar/atualizar uma sala */
+export type ClassRoomFormData = Omit<ClassRoom, 'id'>;
+
 @Injectable({
   providedIn: 'root',
 })
 export class ClassRoomService {
-  // Professores e disciplinas simuladas
+  // Professores simulados
   private mockTeachers: Teacher[] = [
     { id: 1, name: 'João Silva', email: 'joao.silva@email.com', dateOfBirth: '1980-05-12', subject: 'Matemática', phone: '123456789', address: 'Rua A, 123' },
     { id: 2, name: 'Maria Souza', email: 'maria.souza@email.com', dateOfBirth: '1975-10-30', subject: 'História', phone: '987654321', address: 'Av. B, 456' },
   ];
 
+  // Disciplinas simuladas
   private mockSubjects: Subject[] = [
     { id: 1, name: 'Matemática', description: 'Estudo de números, álgebra e geometria', workloadHours: 60 },
     { id: 2, name: 'História', description: 'Estudo do passado da humanidade', workloadHours: 45 },
@@ -56,21 +59,28 @@ export class ClassRoomService {
   private classroomsSubject = new BehaviorSubject<ClassRoom[]>(this.initialClassRooms);
   classrooms$ = this.classroomsSubject.asObservable();
 
+  /** Lista todas as salas */
   getAll(): Observable<ClassRoom[]> {
     return this.classrooms$;
   }
 
+  /** Busca sala por ID */
   getById(id: number): Observable<ClassRoom | undefined> {
     const classroom = this.classroomsSubject.getValue().find(c => c.id === id);
     return of(classroom);
   }
 
-  add(classroom: ClassRoom): void {
+  /** Cria nova sala */
+  add(classroom: ClassRoomFormData): void {
     const current = this.classroomsSubject.getValue();
-    const newClassroom = { ...classroom, id: current.length ? Math.max(...current.map(c => c.id)) + 1 : 1 };
+    const newClassroom: ClassRoom = {
+      ...classroom,
+      id: current.length ? Math.max(...current.map(c => c.id)) + 1 : 1,
+    };
     this.classroomsSubject.next([...current, newClassroom]);
   }
 
+  /** Atualiza sala existente */
   update(classroom: ClassRoom): void {
     const current = this.classroomsSubject.getValue();
     const index = current.findIndex(c => c.id === classroom.id);
@@ -80,8 +90,24 @@ export class ClassRoomService {
     }
   }
 
+  /** Remove sala pelo ID */
   delete(id: number): void {
     const current = this.classroomsSubject.getValue();
     this.classroomsSubject.next(current.filter(c => c.id !== id));
+  }
+
+  /** Lista todos os professores mockados */
+  getTeachers(): Observable<Teacher[]> {
+    return of(this.mockTeachers);
+  }
+
+  /** Lista todas as disciplinas mockadas */
+  getSubjects(): Observable<Subject[]> {
+    return of(this.mockSubjects);
+  }
+
+  /** Snapshot atual das salas */
+  snapshot(): ClassRoom[] {
+    return this.classroomsSubject.getValue();
   }
 }

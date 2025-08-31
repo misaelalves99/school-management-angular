@@ -28,9 +28,23 @@
       ></textarea>
     </div>
 
+    <!-- Novo campo: Carga Horária -->
+    <div class="formGroup">
+      <label for="workloadHours" class="formLabel">Carga Horária (horas)</label>
+      <input
+        type="number"
+        id="workloadHours"
+        name="workloadHours"
+        [(ngModel)]="subject.workloadHours"
+        class="formInput"
+        min="1"
+      />
+      <span *ngIf="errors.workloadHours" class="formError">{{ errors.workloadHours }}</span>
+    </div>
+
     <div class="formActions">
       <button type="submit" class="btnPrimary">Salvar Alterações</button>
-      <button type="button" class="btnSecondary" (click)="back()">Voltar à Lista</button>
+      <button type="button" class="btnSecondary" (click)="back()">Voltar</button>
     </div>
   </form>
 </div>

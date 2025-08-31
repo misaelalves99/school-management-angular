@@ -1,7 +1,5 @@
 // src/pages/enrollments/delete/delete-enrollment.component.ts
 
-// src/pages/enrollments/delete/delete-enrollment.component.ts
-
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
@@ -30,33 +28,38 @@ export class DeleteEnrollmentComponent implements OnInit {
   classRoom: ClassRoom | null = null;
 
   ngOnInit(): void {
-    const id = Number(this.route.snapshot.paramMap.get('id'));
+    const idParam = this.route.snapshot.paramMap.get('id');
+    const id = idParam ? Number(idParam) : null;
+
     if (!id) {
       alert('ID inválido');
       this.router.navigate(['/enrollments']);
       return;
     }
 
-    this.enrollmentService.getById(id).subscribe(e => {
-      if (!e) {
+    this.enrollmentService.getById(id).subscribe(enrollment => {
+      if (!enrollment) {
         alert('Matrícula não encontrada');
         this.router.navigate(['/enrollments']);
         return;
       }
-      this.enrollment = e;
+      this.enrollment = enrollment;
 
-      // Buscar dados do aluno e da sala
-      this.studentService.getById(e.studentId).subscribe(s => this.student = s ?? null);
-      this.classRoomService.getById(e.classRoomId).subscribe(c => this.classRoom = c ?? null);
+      this.studentService.getById(enrollment.studentId).subscribe(s => this.student = s ?? null);
+      this.classRoomService.getById(enrollment.classRoomId).subscribe(c => this.classRoom = c ?? null);
     });
   }
 
   handleDelete(): void {
     if (!this.enrollment) return;
-    if (confirm(`Confirma exclusão da matrícula do aluno ${this.student?.name || 'Desconhecido'}?`)) {
-      this.enrollmentService.delete(this.enrollment.id);
+
+    const alunoNome = this.student?.name || 'Desconhecido';
+    if (!confirm(`Confirma exclusão da matrícula do aluno ${alunoNome}?`)) return;
+
+    this.enrollmentService.delete(this.enrollment.id).subscribe(() => {
+      alert(`Matrícula do aluno ${alunoNome} excluída com sucesso!`);
       this.router.navigate(['/enrollments']);
-    }
+    });
   }
 
   cancel(): void {

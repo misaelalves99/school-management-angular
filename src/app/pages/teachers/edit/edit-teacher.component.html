@@ -30,7 +30,12 @@
     <!-- Disciplina -->
     <div class="formGroup">
       <label for="subject" class="formLabel">Disciplina</label>
-      <input id="subject" name="subject" type="text" [(ngModel)]="formData.subject" class="formInput" />
+      <select id="subject" name="subject" [(ngModel)]="formData.subject" class="formInput">
+        <option value="">Selecione uma disciplina</option>
+        <option *ngFor="let subject of subjects" [value]="subject.name">
+          {{ subject.name }}
+        </option>
+      </select>
       <span class="formError" *ngIf="errors.subject">{{ errors.subject }}</span>
     </div>
 
@@ -48,7 +53,7 @@
 
     <div class="formActions">
       <button type="submit" class="btnPrimary">Salvar</button>
-      <button type="button" class="btnSecondary" (click)="goBack()">Voltar à Lista</button>
+      <button type="button" class="btnSecondary" (click)="goBack()">Voltar</button>
     </div>
   </form>
 </div>

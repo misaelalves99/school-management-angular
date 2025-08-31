@@ -1,30 +1,20 @@
 // src/pages/enrollments/create/create-enrollment.component.ts
 
-import { Component, Input } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-
-export interface Student {
-  id: number;
-  name: string;
-}
-
-export interface ClassRoom {
-  id: number;
-  name: string;
-}
-
-export interface EnrollmentForm {
-  studentId: number | '';
-  classRoomId: number | '';
-  enrollmentDate: string;
-}
+import { EnrollmentService, Enrollment } from '../../../services/enrollment.service';
+import { Student } from '../../../types/student.model';
+import { ClassRoom } from '../../../types/classroom.model';
+import { StudentService } from '../../../services/student.service';
+import { ClassRoomService } from '../../../services/classroom.service';
 
 interface ValidationErrors {
   studentId?: string;
   classRoomId?: string;
   enrollmentDate?: string;
+  status?: string;
 }
 
 @Component({
@@ -35,19 +25,39 @@ interface ValidationErrors {
   styleUrls: ['./create-enrollment.component.css'],
 })
 export class CreateEnrollmentComponent {
-  @Input() students: Student[] = [];
-  @Input() classRooms: ClassRoom[] = [];
-  @Input() onCreate!: (data: EnrollmentForm) => Promise<void>;
+  students: Student[] = [];
+  classRooms: ClassRoom[] = [];
 
-  form: EnrollmentForm = {
-    studentId: '',
-    classRoomId: '',
+  form: Partial<Enrollment> = {
+    studentId: undefined,
+    classRoomId: undefined,
     enrollmentDate: new Date().toISOString().slice(0, 10),
+    status: 'Ativo', // valor padrão
   };
 
   errors: ValidationErrors = {};
 
-  constructor(private router: Router) {}
+  constructor(
+    private enrollmentService: EnrollmentService,
+    private studentService: StudentService,
+    private classRoomService: ClassRoomService,
+    private router: Router
+  ) {
+    this.loadStudents();
+    this.loadClassRooms();
+  }
+
+  loadStudents() {
+    this.studentService.getAll().subscribe((data) => {
+      this.students = data;
+    });
+  }
+
+  loadClassRooms() {
+    this.classRoomService.getAll().subscribe((data) => {
+      this.classRooms = data;
+    });
+  }
 
   validate(): boolean {
     const newErrors: ValidationErrors = {};
@@ -55,20 +65,25 @@ export class CreateEnrollmentComponent {
     if (!this.form.studentId) newErrors.studentId = 'Aluno é obrigatório.';
     if (!this.form.classRoomId) newErrors.classRoomId = 'Turma é obrigatória.';
     if (!this.form.enrollmentDate) newErrors.enrollmentDate = 'Data da matrícula é obrigatória.';
+    if (!this.form.status) newErrors.status = 'Status é obrigatório.';
 
     this.errors = newErrors;
     return Object.keys(newErrors).length === 0;
   }
 
-  async handleSubmit() {
+  handleSubmit() {
     if (!this.validate()) return;
 
-    try {
-      await this.onCreate(this.form);
-      this.router.navigate(['/enrollments']);
-    } catch (error) {
-      console.error(error);
-    }
+    const newEnrollment: Enrollment = {
+      id: Math.floor(Math.random() * 10000), // apenas mock
+      studentId: Number(this.form.studentId),
+      classRoomId: Number(this.form.classRoomId),
+      enrollmentDate: this.form.enrollmentDate!,
+      status: this.form.status!, // pega do formulário
+    };
+
+    this.enrollmentService.add(newEnrollment);
+    this.router.navigate(['/enrollments']);
   }
 
   goBack() {

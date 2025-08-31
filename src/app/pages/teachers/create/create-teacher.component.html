@@ -1,24 +1,85 @@
-<!-- src/pages/teachers/create/create-teacher.component.html -->
-
 <div class="createContainer">
-  <h1 class="createTitle">Cadastrar Novo Professor</h1>
+  <h2 class="createTitle">Cadastrar Professor</h2>
 
-  <form (ngSubmit)="handleSubmit()" class="createForm">
-    <div class="formGroup" *ngFor="let field of fields">
-      <label [for]="field.name" class="formLabel">{{ field.label }}</label>
+  <form class="createForm" (ngSubmit)="handleSubmit()">
+
+    <div class="formGroup">
+      <label class="formLabel" for="name">Nome</label>
       <input
-        [id]="field.name"
-        [type]="field.type"
-        [(ngModel)]="formData[field.name]"
-        [name]="field.name"
+        id="name"
+        name="name"
+        type="text"
+        [(ngModel)]="formData.name"
         class="formInput"
       />
-      <span *ngIf="errors[field.name]" class="formError">{{ errors[field.name] }}</span>
+      <div class="formError" *ngIf="errors.name">{{ errors.name }}</div>
+    </div>
+
+    <div class="formGroup">
+      <label class="formLabel" for="email">Email</label>
+      <input
+        id="email"
+        name="email"
+        type="email"
+        [(ngModel)]="formData.email"
+        class="formInput"
+      />
+      <div class="formError" *ngIf="errors.email">{{ errors.email }}</div>
+    </div>
+
+    <div class="formGroup">
+      <label class="formLabel" for="dateOfBirth">Data de Nascimento</label>
+      <input
+        id="dateOfBirth"
+        name="dateOfBirth"
+        type="date"
+        [(ngModel)]="formData.dateOfBirth"
+        class="formInput"
+      />
+      <div class="formError" *ngIf="errors.dateOfBirth">{{ errors.dateOfBirth }}</div>
+    </div>
+
+    <div class="formGroup">
+      <label class="formLabel" for="phone">Telefone</label>
+      <input
+        id="phone"
+        name="phone"
+        type="tel"
+        [(ngModel)]="formData.phone"
+        class="formInput"
+      />
+    </div>
+
+    <div class="formGroup">
+      <label class="formLabel" for="address">Endereço</label>
+      <input
+        id="address"
+        name="address"
+        type="text"
+        [(ngModel)]="formData.address"
+        class="formInput"
+      />
+    </div>
+
+    <div class="formGroup">
+      <label class="formLabel" for="subject">Disciplina</label>
+      <select
+        id="subject"
+        name="subject"
+        [(ngModel)]="formData.subject"
+        class="formInput"
+      >
+        <option value="">Selecione uma disciplina</option>
+        <option *ngFor="let subject of subjects" [value]="subject.id">
+          {{ subject.name }}
+        </option>
+      </select>
+      <div class="formError" *ngIf="errors.subject">{{ errors.subject }}</div>
     </div>
 
     <div class="formActions">
-      <button type="submit" class="btnPrimary">Salvar</button>
-      <button type="button" class="btnSecondary" routerLink="/teachers">Voltar à Lista</button>
+      <button type="submit" class="btnPrimary">Cadastrar</button>
+      <button type="button" class="btnSecondary" (click)="goBack()">Voltar</button>
     </div>
   </form>
 </div>

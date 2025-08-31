@@ -1,16 +1,38 @@
 // src/services/student.service.ts
-
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
-import { Student } from '../types/student.model';
+import { Student } from '../types/student.model'; // <-- Importa do model correto
 
+/** Dados para criar um novo estudante */
 export type StudentFormData = Omit<Student, 'id'>;
 
 @Injectable({
   providedIn: 'root',
 })
 export class StudentService {
-  private studentsSubject = new BehaviorSubject<Student[]>([]);
+  // Mock inicial de estudantes
+  private initialStudents: Student[] = [
+    {
+      id: 1,
+      name: 'João Silva',
+      email: 'joao.silva@email.com',
+      dateOfBirth: '2000-01-15',
+      enrollmentNumber: '20230001',
+      phone: '123456789',
+      address: 'Rua A, 123',
+    },
+    {
+      id: 2,
+      name: 'Maria Souza',
+      email: 'maria.souza@email.com',
+      dateOfBirth: '1999-05-30',
+      enrollmentNumber: '20230002',
+      phone: '987654321',
+      address: 'Av. B, 456',
+    },
+  ];
+
+  private studentsSubject = new BehaviorSubject<Student[]>(this.initialStudents);
   students$ = this.studentsSubject.asObservable();
 
   /** Lista todos os alunos */
@@ -29,7 +51,7 @@ export class StudentService {
     const current = this.studentsSubject.getValue();
     const newStudent: Student = {
       ...data,
-      id: Math.max(0, ...current.map(s => s.id)) + 1,
+      id: current.length ? Math.max(...current.map(s => s.id)) + 1 : 1,
     };
     this.studentsSubject.next([...current, newStudent]);
     return of(newStudent);

@@ -1,10 +1,13 @@
 // src/pages/teachers/edit/edit-teacher.component.ts
-import { Component, inject } from '@angular/core';
+
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 import { TeacherService } from '../../../services/teacher.service';
+import { SubjectService } from '../../../services/subject.service';
 import { TeacherFormData } from '../../../types/teacher.model';
+import { Subject } from '../../../types/subject.model';
 
 @Component({
   selector: 'app-edit-teacher',
@@ -13,15 +16,17 @@ import { TeacherFormData } from '../../../types/teacher.model';
   templateUrl: './edit-teacher.component.html',
   styleUrls: ['./edit-teacher.component.css'],
 })
-export class EditTeacherComponent {
+export class EditTeacherComponent implements OnInit {
   private teacherService = inject(TeacherService);
+  private subjectService = inject(SubjectService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
 
   loading = true;
   teacherId!: number;
 
-  // agora tipado corretamente
+  subjects: Subject[] = [];
+
   formData: TeacherFormData = {
     name: '',
     email: '',
@@ -29,13 +34,17 @@ export class EditTeacherComponent {
     subject: '',
     phone: '',
     address: '',
-    photoUrl: '', // opcional
+    photoUrl: '',
   };
 
   errors: Partial<Record<keyof TeacherFormData, string>> = {};
 
   ngOnInit(): void {
     this.teacherId = Number(this.route.snapshot.paramMap.get('id'));
+
+    // Carregar disciplinas
+    this.subjectService.getAll().subscribe((data) => (this.subjects = data));
+
     this.teacherService.getById(this.teacherId).subscribe({
       next: (teacher) => {
         if (!teacher) {
@@ -43,9 +52,6 @@ export class EditTeacherComponent {
           this.router.navigate(['/teachers']);
           return;
         }
-
-        // como Teacher tem `id`, mas formData é TeacherFormData (sem id),
-        // usamos destructuring para excluir o id
         const { id, ...rest } = teacher;
         this.formData = { ...rest };
         this.loading = false;

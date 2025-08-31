@@ -16,10 +16,10 @@
     <table class="table">
       <thead>
         <tr>
+          <th>ID</th> <!-- Coluna adicionada -->
           <th>Nome</th>
           <th>Matrícula</th>
           <th>Telefone</th>
-          <th>Endereço</th>
           <th>Ações</th>
         </tr>
       </thead>
@@ -28,10 +28,10 @@
           <td colspan="5" style="text-align:center; padding:20px;">Nenhum aluno encontrado.</td>
         </tr>
         <tr *ngFor="let student of students">
+          <td>{{ student.id }}</td> <!-- ID mostrado -->
           <td>{{ student.name }}</td>
           <td>{{ student.enrollmentNumber }}</td>
           <td>{{ student.phone || '-' }}</td>
-          <td>{{ student.address || '-' }}</td>
           <td>
             <a [routerLink]="['/students/details', student.id]" class="btn btnInfo">Detalhes</a>
             <a [routerLink]="['/students/edit', student.id]" class="btn btnWarning">Editar</a>

@@ -10,6 +10,13 @@ import { ClassRoomService } from '../../../services/classroom.service';
 import { Student } from '../../../types/student.model';
 import { ClassRoom } from '../../../types/classroom.model';
 
+interface ValidationErrors {
+  studentId?: string;
+  classRoomId?: string;
+  enrollmentDate?: string;
+  status?: string;
+}
+
 @Component({
   selector: 'app-edit-enrollment',
   standalone: true,
@@ -29,10 +36,12 @@ export class EditEnrollmentComponent implements OnInit {
   classRooms: ClassRoom[] = [];
 
   formData!: Enrollment;
-  errors: { studentId?: string; classRoomId?: string; enrollmentDate?: string } = {};
+  errors: ValidationErrors = {};
 
   ngOnInit(): void {
-    const id = Number(this.route.snapshot.paramMap.get('id'));
+    const idParam = this.route.snapshot.paramMap.get('id');
+    const id = idParam ? Number(idParam) : null;
+
     if (!id) {
       alert('ID inválido');
       this.router.navigate(['/enrollments']);
@@ -54,13 +63,20 @@ export class EditEnrollmentComponent implements OnInit {
     this.classRoomService.getAll().subscribe(classRooms => this.classRooms = classRooms);
   }
 
-  handleSubmit(): void {
-    this.errors = {};
-    if (!this.formData.studentId) this.errors.studentId = 'Aluno é obrigatório.';
-    if (!this.formData.classRoomId) this.errors.classRoomId = 'Turma é obrigatória.';
-    if (!this.formData.enrollmentDate) this.errors.enrollmentDate = 'Data é obrigatória.';
+  validate(): boolean {
+    const newErrors: ValidationErrors = {};
 
-    if (Object.keys(this.errors).length > 0) return;
+    if (!this.formData.studentId) newErrors.studentId = 'Aluno é obrigatório.';
+    if (!this.formData.classRoomId) newErrors.classRoomId = 'Turma é obrigatória.';
+    if (!this.formData.enrollmentDate) newErrors.enrollmentDate = 'Data é obrigatória.';
+    if (!this.formData.status) newErrors.status = 'Status é obrigatório.';
+
+    this.errors = newErrors;
+    return Object.keys(newErrors).length === 0;
+  }
+
+  handleSubmit(): void {
+    if (!this.validate()) return;
 
     this.enrollmentService.update(this.formData);
     this.router.navigate(['/enrollments']);

@@ -9,6 +9,7 @@ interface Subject {
   id: number;
   name: string;
   description: string;
+  workloadHours: number; // novo campo
 }
 
 // Mock de disciplina
@@ -16,6 +17,7 @@ const mockSubject: Subject = {
   id: 1,
   name: 'Matemática',
   description: 'Disciplina de matemática básica',
+  workloadHours: 60, // valor inicial
 };
 
 @Component({
@@ -26,8 +28,8 @@ const mockSubject: Subject = {
   styleUrls: ['./edit-subject.component.css'],
 })
 export class EditSubjectComponent {
-  subject: Subject = { id: 0, name: '', description: '' };
-  errors: { name?: string } = {};
+  subject: Subject = { id: 0, name: '', description: '', workloadHours: 1 };
+  errors: { name?: string; workloadHours?: string } = {};
 
   constructor(private route: ActivatedRoute, private router: Router) {
     const idParam = this.route.snapshot.paramMap.get('id');
@@ -36,8 +38,16 @@ export class EditSubjectComponent {
   }
 
   validate(): boolean {
-    const newErrors: { name?: string } = {};
-    if (!this.subject.name.trim()) newErrors.name = 'O nome da disciplina é obrigatório.';
+    const newErrors: { name?: string; workloadHours?: string } = {};
+
+    if (!this.subject.name.trim()) {
+      newErrors.name = 'O nome da disciplina é obrigatório.';
+    }
+
+    if (!this.subject.workloadHours || this.subject.workloadHours <= 0) {
+      newErrors.workloadHours = 'A carga horária deve ser maior que zero.';
+    }
+
     this.errors = newErrors;
     return Object.keys(newErrors).length === 0;
   }

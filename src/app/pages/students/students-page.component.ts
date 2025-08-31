@@ -1,5 +1,4 @@
 // src/pages/students/students-page.component.ts
-
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -7,7 +6,7 @@ import { RouterModule } from '@angular/router';
 import { StudentService, StudentFormData } from '../../services/student.service';
 import { Student } from '../../types/student.model';
 
-// Mock inicial (agora com todos os campos de Student)
+// Mock inicial completo
 export const mockStudents: Student[] = [
   {
     id: 1,
@@ -56,7 +55,7 @@ export class StudentsPageComponent implements OnInit {
     this.studentService.getAll().subscribe(list => {
       if (list.length === 0) {
         mockStudents.forEach(s => {
-          const { id, ...data } = s; // remove o id para passar como StudentFormData
+          const { id, ...data } = s;
           this.studentService.create(data as StudentFormData).subscribe();
         });
       }
