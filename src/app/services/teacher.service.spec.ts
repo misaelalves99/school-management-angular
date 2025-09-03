@@ -8,29 +8,6 @@ import { take } from 'rxjs/operators';
 describe('TeacherService', () => {
   let service: TeacherService;
 
-  const initialTeachers: Teacher[] = [
-    {
-      id: 1,
-      name: 'João Silva',
-      email: 'joao.silva@email.com',
-      dateOfBirth: '1980-05-12',
-      subject: 'Matemática',
-      phone: '123456789',
-      address: 'Rua A, 123',
-      photoUrl: 'https://i.pravatar.cc/150?img=1',
-    },
-    {
-      id: 2,
-      name: 'Maria Souza',
-      email: 'maria.souza@email.com',
-      dateOfBirth: '1975-10-30',
-      subject: 'História',
-      phone: '987654321',
-      address: 'Av. B, 456',
-      photoUrl: 'https://i.pravatar.cc/150?img=2',
-    },
-  ];
-
   beforeEach(() => {
     TestBed.configureTestingModule({});
     service = TestBed.inject(TeacherService);
@@ -40,14 +17,16 @@ describe('TeacherService', () => {
     expect(service).toBeTruthy();
   });
 
-  it('should return all teachers', (done) => {
+  it('should return initial teachers', (done) => {
     service.getAll().pipe(take(1)).subscribe(teachers => {
-      expect(teachers.length).toBe(initialTeachers.length);
+      expect(teachers.length).toBe(2);
+      expect(teachers[0].name).toBe('João Silva');
+      expect(teachers[1].name).toBe('Maria Souza');
       done();
     });
   });
 
-  it('should return teacher by id', (done) => {
+  it('should get teacher by id', (done) => {
     service.getById(1).subscribe(teacher => {
       expect(teacher?.name).toBe('João Silva');
       done();
@@ -77,7 +56,7 @@ describe('TeacherService', () => {
       expect(created.name).toBe('Carlos Lima');
 
       service.getAll().pipe(take(1)).subscribe(all => {
-        expect(all.length).toBe(initialTeachers.length + 1);
+        expect(all.length).toBe(3);
         expect(all.find(t => t.id === created.id)).toBeTruthy();
         done();
       });
@@ -102,6 +81,7 @@ describe('TeacherService', () => {
     service.delete(1).subscribe(() => {
       service.getAll().pipe(take(1)).subscribe(all => {
         expect(all.find(t => t.id === 1)).toBeUndefined();
+        expect(all.length).toBe(1);
         done();
       });
     });
@@ -110,9 +90,15 @@ describe('TeacherService', () => {
   it('should do nothing when deleting non-existent teacher', (done) => {
     service.delete(999).subscribe(() => {
       service.getAll().pipe(take(1)).subscribe(all => {
-        expect(all.length).toBe(initialTeachers.length);
+        expect(all.length).toBe(2); // mock inicial permanece
         done();
       });
     });
+  });
+
+  it('should return snapshot of current teachers', () => {
+    const snapshot = service.snapshot();
+    expect(snapshot.length).toBe(2);
+    expect(snapshot[0].name).toBe('João Silva');
   });
 });

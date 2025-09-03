@@ -7,6 +7,14 @@ import { EnrollmentService, Enrollment } from '../../../services/enrollment.serv
 import { StudentService } from '../../../services/student.service';
 import { ClassRoomService } from '../../../services/classroom.service';
 
+export interface EnrollmentDetails {
+  id: number;
+  studentName: string | null;
+  classRoomName: string | null;
+  status: 'Ativo' | 'Inativo' | '-' | null;
+  enrollmentDate: string;
+}
+
 @Component({
   selector: 'app-details-enrollment',
   standalone: true,
@@ -21,13 +29,7 @@ export class DetailsEnrollmentComponent implements OnInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
-  enrollment: {
-    id: number;
-    studentName: string | null;
-    classRoomName: string | null;
-    status: string | null;
-    enrollmentDate: string;
-  } | null = null;
+  enrollment: EnrollmentDetails | null = null;
 
   ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('id');
@@ -46,12 +48,14 @@ export class DetailsEnrollmentComponent implements OnInit {
         return;
       }
 
-      // Buscar nomes do aluno e da turma
       let studentName: string | null = null;
       let classRoomName: string | null = null;
 
-      this.studentService.getById(e.studentId).subscribe(s => studentName = s?.name ?? 'Aluno não informado');
-      this.classRoomService.getById(e.classRoomId).subscribe(c => classRoomName = c?.name ?? 'Turma não informada');
+      this.studentService.getById(e.studentId)
+        .subscribe(s => studentName = s?.name ?? null);
+
+      this.classRoomService.getById(e.classRoomId)
+        .subscribe(c => classRoomName = c?.name ?? null);
 
       this.enrollment = {
         id: e.id,

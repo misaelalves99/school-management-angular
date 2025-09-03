@@ -3,111 +3,178 @@
 import { render, screen, fireEvent } from '@testing-library/angular';
 import { DeleteSubjectComponent } from './delete-subject.component';
 import { Router } from '@angular/router';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, ParamMap, UrlSegment } from '@angular/router';
+import { SubjectService } from '../../../services/subject.service';
+import { of } from 'rxjs';
 
 describe('DeleteSubjectComponent', () => {
-  it('should create the component and display title', async () => {
+  let mockRouter: Partial<Router>;
+  let mockSubjectService: Partial<SubjectService>;
+  let mockActivatedRoute: Partial<ActivatedRoute>;
+
+  beforeEach(() => {
+    // Mock do Router
+    mockRouter = { navigate: jasmine.createSpy('navigate') };
+
+    // Mock do SubjectService
+    mockSubjectService = {
+      getById: jasmine.createSpy('getById').and.returnValue(
+        of({
+          id: 1,
+          name: 'Matemática',
+          description: 'Disciplina de matemática',
+          workloadHours: 60,
+        })
+      ),
+      delete: jasmine.createSpy('delete'),
+    };
+
+    // Mock seguro do ActivatedRoute
+    const mockParamMap: ParamMap = {
+      get: (key: string) => (key === 'id' ? '1' : null),
+      has: (key: string) => key === 'id',
+      getAll: (key: string) => (key === 'id' ? ['1'] : []),
+      keys: ['id'],
+    };
+
+    mockActivatedRoute = {
+      snapshot: {
+        paramMap: mockParamMap,
+        queryParamMap: mockParamMap,
+        url: [] as UrlSegment[],
+        params: {},
+        queryParams: {},
+        fragment: null,
+        data: {},
+        outlet: 'primary',
+        routeConfig: null,
+        root: {} as any,
+        parent: null,
+        firstChild: null,
+        children: [],
+        pathFromRoot: [],
+        toString: () => '',
+        component: null,
+        title: undefined, 
+      },
+    };
+  });
+
+  it('should create component and display title and warning', async () => {
     await render(DeleteSubjectComponent, {
       providers: [
-        { provide: Router, useValue: { navigate: jasmine.createSpy('navigate') } },
-        {
-          provide: ActivatedRoute,
-          useValue: { snapshot: { paramMap: { get: () => '123' } } }
-        }
-      ]
+        { provide: Router, useValue: mockRouter },
+        { provide: SubjectService, useValue: mockSubjectService },
+        { provide: ActivatedRoute, useValue: mockActivatedRoute },
+      ],
     });
 
     expect(screen.getByText('Excluir Disciplina')).toBeTruthy();
     expect(screen.getByText('Tem certeza que deseja excluir esta disciplina?')).toBeTruthy();
+    expect(screen.getByText('Matemática')).toBeTruthy();
   });
 
-  it('should get subjectId from route params', async () => {
+  it('should fetch subject on init', async () => {
     const { fixture } = await render(DeleteSubjectComponent, {
       providers: [
-        { provide: Router, useValue: { navigate: jasmine.createSpy('navigate') } },
-        {
-          provide: ActivatedRoute,
-          useValue: { snapshot: { paramMap: { get: () => '456' } } }
-        }
-      ]
+        { provide: Router, useValue: mockRouter },
+        { provide: SubjectService, useValue: mockSubjectService },
+        { provide: ActivatedRoute, useValue: mockActivatedRoute },
+      ],
     });
 
     const component = fixture.componentInstance;
-    expect(component.subjectId).toBe('456');
+    expect(mockSubjectService.getById).toHaveBeenCalledWith(1);
+    expect(component.subject?.name).toBe('Matemática');
   });
 
-  it('should call router.navigate on handleDelete', async () => {
-    const mockRouter = { navigate: jasmine.createSpy('navigate') };
+  it('should navigate to /subjects on cancel', async () => {
+    const { fixture } = await render(DeleteSubjectComponent, {
+      providers: [
+        { provide: Router, useValue: mockRouter },
+        { provide: SubjectService, useValue: mockSubjectService },
+        { provide: ActivatedRoute, useValue: mockActivatedRoute },
+      ],
+    });
+
+    const component = fixture.componentInstance;
+    component.cancel();
+    expect(mockRouter.navigate).toHaveBeenCalledWith(['/subjects']);
+  });
+
+  it('should call delete and navigate when handleDelete is confirmed', async () => {
+    spyOn(window, 'confirm').and.returnValue(true);
+    spyOn(window, 'alert');
 
     const { fixture } = await render(DeleteSubjectComponent, {
       providers: [
         { provide: Router, useValue: mockRouter },
-        {
-          provide: ActivatedRoute,
-          useValue: { snapshot: { paramMap: { get: () => '789' } } }
-        }
-      ]
+        { provide: SubjectService, useValue: mockSubjectService },
+        { provide: ActivatedRoute, useValue: mockActivatedRoute },
+      ],
     });
 
     const component = fixture.componentInstance;
     component.handleDelete();
 
+    expect(window.confirm).toHaveBeenCalledWith(
+      `Tem certeza que deseja excluir a disciplina: Matemática?`
+    );
+    expect(mockSubjectService.delete).toHaveBeenCalledWith(1);
+    expect(window.alert).toHaveBeenCalledWith('Disciplina excluída com sucesso.');
     expect(mockRouter.navigate).toHaveBeenCalledWith(['/subjects']);
   });
 
-  it('should call router.navigate on cancel', async () => {
-    const mockRouter = { navigate: jasmine.createSpy('navigate') };
+  it('should not delete if handleDelete is canceled', async () => {
+    spyOn(window, 'confirm').and.returnValue(false);
+    spyOn(window, 'alert');
 
     const { fixture } = await render(DeleteSubjectComponent, {
       providers: [
         { provide: Router, useValue: mockRouter },
-        {
-          provide: ActivatedRoute,
-          useValue: { snapshot: { paramMap: { get: () => '101' } } }
-        }
-      ]
+        { provide: SubjectService, useValue: mockSubjectService },
+        { provide: ActivatedRoute, useValue: mockActivatedRoute },
+      ],
     });
 
     const component = fixture.componentInstance;
-    component.cancel();
+    component.handleDelete();
 
-    expect(mockRouter.navigate).toHaveBeenCalledWith(['/subjects']);
+    expect(mockSubjectService.delete).not.toHaveBeenCalled();
+    expect(window.alert).not.toHaveBeenCalled();
+    expect(mockRouter.navigate).not.toHaveBeenCalled();
   });
 
   it('should trigger handleDelete when Excluir button is clicked', async () => {
-    const mockRouter = { navigate: jasmine.createSpy('navigate') };
+    spyOn(window, 'confirm').and.returnValue(true);
+    spyOn(window, 'alert');
 
     await render(DeleteSubjectComponent, {
       providers: [
         { provide: Router, useValue: mockRouter },
-        {
-          provide: ActivatedRoute,
-          useValue: { snapshot: { paramMap: { get: () => '202' } } }
-        }
-      ]
+        { provide: SubjectService, useValue: mockSubjectService },
+        { provide: ActivatedRoute, useValue: mockActivatedRoute },
+      ],
     });
 
-    const deleteButton = screen.getByText('Excluir');
-    fireEvent.click(deleteButton);
+    const button = screen.getByText('Excluir');
+    fireEvent.click(button);
 
+    expect(mockSubjectService.delete).toHaveBeenCalledWith(1);
     expect(mockRouter.navigate).toHaveBeenCalledWith(['/subjects']);
   });
 
   it('should trigger cancel when Cancelar button is clicked', async () => {
-    const mockRouter = { navigate: jasmine.createSpy('navigate') };
-
     await render(DeleteSubjectComponent, {
       providers: [
         { provide: Router, useValue: mockRouter },
-        {
-          provide: ActivatedRoute,
-          useValue: { snapshot: { paramMap: { get: () => '303' } } }
-        }
-      ]
+        { provide: SubjectService, useValue: mockSubjectService },
+        { provide: ActivatedRoute, useValue: mockActivatedRoute },
+      ],
     });
 
-    const cancelButton = screen.getByText('Cancelar');
-    fireEvent.click(cancelButton);
+    const button = screen.getByText('Cancelar');
+    fireEvent.click(button);
 
     expect(mockRouter.navigate).toHaveBeenCalledWith(['/subjects']);
   });

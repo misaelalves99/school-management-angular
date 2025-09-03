@@ -1,29 +1,37 @@
 // src/pages/students/create/create-page.component.spec.ts
 
-import { TestBed, ComponentFixture } from '@angular/core/testing';
+import { TestBed, ComponentFixture, fakeAsync, tick } from '@angular/core/testing';
 import { CreateStudentComponent } from './create-page.component';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
+import { of } from 'rxjs';
 import { render, screen, fireEvent } from '@testing-library/angular';
 
 describe('CreateStudentComponent', () => {
   let component: CreateStudentComponent;
   let fixture: ComponentFixture<CreateStudentComponent>;
   let routerMock: Partial<Router>;
+  let studentServiceMock: any;
 
   beforeEach(async () => {
-    routerMock = {
-      navigate: jasmine.createSpy('navigate'),
-    };
+    routerMock = { navigate: jasmine.createSpy('navigate') };
+    studentServiceMock = { create: jasmine.createSpy('create').and.returnValue(of({})) };
 
     await TestBed.configureTestingModule({
       imports: [CommonModule, FormsModule, CreateStudentComponent],
-      providers: [{ provide: Router, useValue: routerMock }],
+      providers: [
+        { provide: Router, useValue: routerMock },
+        { provide: 'StudentService', useValue: studentServiceMock },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(CreateStudentComponent);
     component = fixture.componentInstance;
+
+    // Forçar o serviço mock interno
+    (component as any).studentService = studentServiceMock;
+
     fixture.detectChanges();
   });
 
@@ -49,7 +57,7 @@ describe('CreateStudentComponent', () => {
     expect(component.errors.enrollmentNumber).toBe('Matrícula é obrigatória.');
   });
 
-  it('should navigate to /students on successful submit', () => {
+  it('should call studentService.create and navigate on successful submit', fakeAsync(() => {
     component.student = {
       name: 'Teste',
       email: 'teste@email.com',
@@ -59,8 +67,18 @@ describe('CreateStudentComponent', () => {
       address: 'Rua Teste',
     };
 
-    component.onSubmit({} as any);
+    component.onSubmit({} as NgForm);
+    tick();
+
+    expect(studentServiceMock.create).toHaveBeenCalledWith(component.student);
     expect(routerMock.navigate).toHaveBeenCalledWith(['/students']);
+  }));
+
+  it('should not call studentService.create if validation fails', () => {
+    component.student = { ...component.student, name: '' };
+    component.onSubmit({} as NgForm);
+
+    expect(studentServiceMock.create).not.toHaveBeenCalled();
   });
 
   it('should navigate back when goBack is called', () => {
@@ -79,14 +97,22 @@ describe('CreateStudentComponent', () => {
     expect(screen.getByLabelText('Endereço')).toBeTruthy();
 
     expect(screen.getByText('Salvar')).toBeTruthy();
-    expect(screen.getByText('Voltar à Lista')).toBeTruthy();
+    expect(screen.getByText('Voltar')).toBeTruthy();
   });
 
-  it('should show validation errors in template', async () => {
+  it('should display validation errors in template', () => {
     component.validate();
     fixture.detectChanges();
 
-    const nameError = fixture.nativeElement.querySelector('.textDanger');
+    const nameError = fixture.nativeElement.querySelector('.formError');
     expect(nameError.textContent).toContain('Nome é obrigatório.');
+  });
+
+  it('should update inputs via ngModel', async () => {
+    await render(CreateStudentComponent, { imports: [CommonModule, FormsModule] });
+
+    const nameInput = screen.getByLabelText('Nome') as HTMLInputElement;
+    fireEvent.input(nameInput, { target: { value: 'Novo Nome' } });
+    expect(nameInput.value).toBe('Novo Nome');
   });
 });

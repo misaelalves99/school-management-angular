@@ -33,7 +33,7 @@ describe('CreateClassroomComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('não deve chamar service se campos estiverem vazios', () => {
+  it('não deve chamar service se campos obrigatórios estiverem vazios', () => {
     component.name = '';
     component.capacity = null;
     component.schedule = '';
@@ -41,7 +41,7 @@ describe('CreateClassroomComponent', () => {
     expect(classRoomService.add).not.toHaveBeenCalled();
   });
 
-  it('deve chamar service e navegar ao submeter formulário', () => {
+  it('deve chamar service com objeto completo e navegar ao submeter formulário válido', () => {
     spyOn(router, 'navigate');
 
     component.name = 'Sala A';
@@ -51,10 +51,15 @@ describe('CreateClassroomComponent', () => {
     component.handleSubmit();
 
     expect(classRoomService.add).toHaveBeenCalledWith(jasmine.objectContaining({
+      id: 0,
       name: 'Sala A',
       capacity: 30,
-      schedule: 'Seg 08:00-10:00'
+      schedule: 'Seg 08:00-10:00',
+      subjects: [],
+      classTeacher: undefined,
+      teachers: []
     }));
+
     expect(router.navigate).toHaveBeenCalledWith(['/classrooms']);
   });
 

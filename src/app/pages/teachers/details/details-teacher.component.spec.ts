@@ -1,6 +1,6 @@
 // src/pages/teachers/details/details-teacher.component.spec.ts
 
-import { render, screen, fireEvent } from '@testing-library/angular';
+import { render, screen } from '@testing-library/angular';
 import { DetailsTeacherComponent } from './details-teacher.component';
 import { TeacherService } from '../../../services/teacher.service';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -18,19 +18,23 @@ describe('DetailsTeacherComponent', () => {
     photoUrl: ''
   };
 
-  const teacherServiceMock = {
-    getById: jasmine.createSpy('getById').and.returnValue(of(teacherMock))
-  };
-
-  const routerMock = { navigate: jasmine.createSpy('navigate') };
-  const routeMock = { snapshot: { paramMap: { get: jasmine.createSpy('get').and.returnValue('1') } } };
+  let teacherServiceMock: any;
+  let routerMock: any;
+  let routeMock: any;
 
   beforeEach(() => {
-    spyOn(window, 'alert'); // evita popups reais
+    teacherServiceMock = {
+      getById: jasmine.createSpy('getById').and.returnValue(of(teacherMock))
+    };
+
+    routerMock = { navigate: jasmine.createSpy('navigate') };
+    routeMock = { snapshot: { paramMap: { get: jasmine.createSpy('get').and.returnValue('1') } } };
+
+    spyOn(window, 'alert');
   });
 
-  it('should fetch teacher on init', async () => {
-    await render(DetailsTeacherComponent, {
+  it('should fetch teacher on init and format date', async () => {
+    const { fixture } = await render(DetailsTeacherComponent, {
       providers: [
         { provide: TeacherService, useValue: teacherServiceMock },
         { provide: Router, useValue: routerMock },
@@ -38,9 +42,14 @@ describe('DetailsTeacherComponent', () => {
       ]
     });
 
+    const component = fixture.componentInstance;
+
     expect(teacherServiceMock.getById).toHaveBeenCalledWith(1);
-    expect(screen.getByText('João')).toBeTruthy();
-    expect(screen.getByText('Matemática')).toBeTruthy();
+    expect(component.teacher).toEqual(teacherMock);
+
+    // Verifica data formatada
+    const expectedDate = new Date(teacherMock.dateOfBirth).toLocaleDateString();
+    expect(component.formattedDate).toBe(expectedDate);
   });
 
   it('should alert and navigate if id is invalid', async () => {

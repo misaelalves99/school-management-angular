@@ -32,7 +32,7 @@ export class CreateEnrollmentComponent {
     studentId: undefined,
     classRoomId: undefined,
     enrollmentDate: new Date().toISOString().slice(0, 10),
-    status: 'Ativo', // valor padrão
+    status: 'Ativo',
   };
 
   errors: ValidationErrors = {};
@@ -61,12 +61,10 @@ export class CreateEnrollmentComponent {
 
   validate(): boolean {
     const newErrors: ValidationErrors = {};
-
     if (!this.form.studentId) newErrors.studentId = 'Aluno é obrigatório.';
     if (!this.form.classRoomId) newErrors.classRoomId = 'Turma é obrigatória.';
     if (!this.form.enrollmentDate) newErrors.enrollmentDate = 'Data da matrícula é obrigatória.';
     if (!this.form.status) newErrors.status = 'Status é obrigatório.';
-
     this.errors = newErrors;
     return Object.keys(newErrors).length === 0;
   }
@@ -75,11 +73,11 @@ export class CreateEnrollmentComponent {
     if (!this.validate()) return;
 
     const newEnrollment: Enrollment = {
-      id: Math.floor(Math.random() * 10000), // apenas mock
+      id: Math.floor(Math.random() * 10000),
       studentId: Number(this.form.studentId),
       classRoomId: Number(this.form.classRoomId),
       enrollmentDate: this.form.enrollmentDate!,
-      status: this.form.status!, // pega do formulário
+      status: this.form.status!,
     };
 
     this.enrollmentService.add(newEnrollment);

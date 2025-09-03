@@ -3,8 +3,9 @@
 import { render, screen, fireEvent } from '@testing-library/angular';
 import { SubjectsIndexComponent } from './subjects-index.component';
 import { SubjectService } from '../../services/subject.service';
-import { of } from 'rxjs';
 import { Router } from '@angular/router';
+import { of } from 'rxjs';
+import { FormsModule } from '@angular/forms';
 
 describe('SubjectsIndexComponent', () => {
   const mockSubjects = [
@@ -21,20 +22,21 @@ describe('SubjectsIndexComponent', () => {
 
   it('should create and display initial subjects', async () => {
     await render(SubjectsIndexComponent, {
+      imports: [FormsModule],
       providers: [
         { provide: SubjectService, useValue: subjectServiceMock },
         { provide: Router, useValue: routerMock },
       ],
     });
 
-    // Verifica se a tabela exibe os dois primeiros itens da página 1 (PAGE_SIZE=2)
     expect(screen.getByText('Matemática')).toBeTruthy();
     expect(screen.getByText('Física')).toBeTruthy();
-    expect(screen.queryByText('Química')).toBeNull();
+    expect(screen.getByText('Química')).toBeTruthy();
   });
 
-  it('should filter subjects by search', async () => {
+  it('should filter subjects by name', async () => {
     await render(SubjectsIndexComponent, {
+      imports: [FormsModule],
       providers: [
         { provide: SubjectService, useValue: subjectServiceMock },
         { provide: Router, useValue: routerMock },
@@ -42,49 +44,42 @@ describe('SubjectsIndexComponent', () => {
     });
 
     const input = screen.getByPlaceholderText('Digite o nome ou descrição...') as HTMLInputElement;
-    fireEvent.input(input, { target: { value: 'química' } });
+    fireEvent.input(input, { target: { value: 'física' } });
+
+    expect(screen.getByText('Física')).toBeTruthy();
+    expect(screen.queryByText('Matemática')).toBeNull();
+    expect(screen.queryByText('Química')).toBeNull();
+  });
+
+  it('should filter subjects by description', async () => {
+    await render(SubjectsIndexComponent, {
+      imports: [FormsModule],
+      providers: [
+        { provide: SubjectService, useValue: subjectServiceMock },
+        { provide: Router, useValue: routerMock },
+      ],
+    });
+
+    const input = screen.getByPlaceholderText('Digite o nome ou descrição...') as HTMLInputElement;
+    fireEvent.input(input, { target: { value: 'orgânica' } });
 
     expect(screen.getByText('Química')).toBeTruthy();
     expect(screen.queryByText('Matemática')).toBeNull();
     expect(screen.queryByText('Física')).toBeNull();
   });
 
-  it('should go to next and previous pages', async () => {
+  it('should show "Nenhuma disciplina encontrada" if search yields no results', async () => {
     await render(SubjectsIndexComponent, {
+      imports: [FormsModule],
       providers: [
         { provide: SubjectService, useValue: subjectServiceMock },
         { provide: Router, useValue: routerMock },
       ],
     });
 
-    const nextBtn = screen.getByText('Próxima');
-    fireEvent.click(nextBtn);
+    const input = screen.getByPlaceholderText('Digite o nome ou descrição...') as HTMLInputElement;
+    fireEvent.input(input, { target: { value: 'biologia' } });
 
-    // Após avançar para a página 2, deve mostrar o terceiro item
-    expect(screen.getByText('Química')).toBeTruthy();
-    expect(screen.queryByText('Matemática')).toBeNull();
-
-    const prevBtn = screen.getByText('Anterior');
-    fireEvent.click(prevBtn);
-
-    // Página 1 novamente
-    expect(screen.getByText('Matemática')).toBeTruthy();
-    expect(screen.getByText('Física')).toBeTruthy();
-    expect(screen.queryByText('Química')).toBeNull();
-  });
-
-  it('should reset page to 1 when search changes', async () => {
-    await render(SubjectsIndexComponent, {
-      providers: [
-        { provide: SubjectService, useValue: subjectServiceMock },
-        { provide: Router, useValue: routerMock },
-      ],
-    });
-
-    const componentRef = screen.getByPlaceholderText('Digite o nome ou descrição...');
-    fireEvent.input(componentRef, { target: { value: 'Física' } });
-
-    // Página deve ser resetada para 1
-    expect(screen.getByText('Página 1 de 1')).toBeTruthy();
+    expect(screen.getByText('Nenhuma disciplina encontrada.')).toBeTruthy();
   });
 });

@@ -1,7 +1,6 @@
 // src/app/app.component.ts
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { routes } from './app.routes';
 
 // Navbar e Footer
 import { NavbarComponent } from './components/navbar/navbar.component';

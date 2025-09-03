@@ -1,85 +1,124 @@
 // src/pages/class-rooms/edit/edit-classroom.component.spec.ts
 
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { FormsModule } from '@angular/forms';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { EditClassroomComponent } from './edit-classroom.component';
-import { screen, render, fireEvent } from '@testing-library/angular';
+import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
+import { of, throwError } from 'rxjs';
+import { ClassRoomService } from '../../../services/classroom.service';
+import { ClassRoom } from '../../../types/classroom.model';
+import { CommonModule } from '@angular/common';
 
 describe('EditClassroomComponent', () => {
   let component: EditClassroomComponent;
   let fixture: ComponentFixture<EditClassroomComponent>;
+  let classRoomService: jasmine.SpyObj<ClassRoomService>;
+  let router: jasmine.SpyObj<Router>;
+
+  const mockClassRoom: ClassRoom = {
+    id: 1,
+    name: 'Sala A',
+    capacity: 30,
+    schedule: 'Seg 08:00-10:00',
+    subjects: [],
+    teachers: [],
+    classTeacher: undefined
+  };
 
   beforeEach(async () => {
+    const classRoomServiceSpy = jasmine.createSpyObj('ClassRoomService', ['getById', 'update']);
+    const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
+
     await TestBed.configureTestingModule({
-      imports: [FormsModule, EditClassroomComponent],
+      imports: [FormsModule, CommonModule],
+      declarations: [EditClassroomComponent],
+      providers: [
+        { provide: ClassRoomService, useValue: classRoomServiceSpy },
+        { provide: Router, useValue: routerSpy },
+        { provide: ActivatedRoute, useValue: { snapshot: { paramMap: { get: () => '1' } } } }
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(EditClassroomComponent);
     component = fixture.componentInstance;
-
-    // Setando valores de @Input
-    component.id = 1;
-    component.name = 'Sala A';
-    component.capacity = 30;
-
-    fixture.detectChanges();
+    classRoomService = TestBed.inject(ClassRoomService) as jasmine.SpyObj<ClassRoomService>;
+    router = TestBed.inject(Router) as jasmine.SpyObj<Router>;
   });
 
-  it('should create the component', () => {
+  it('deve criar o componente', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should initialize formData with @Input values', () => {
+  it('ngOnInit deve carregar a sala corretamente', fakeAsync(() => {
+    classRoomService.getById.and.returnValue(of(mockClassRoom));
     component.ngOnInit();
-    expect(component.formData.name).toBe('Sala A');
-    expect(component.formData.capacity).toBe(30);
+    tick();
+    expect(component.classRoom).toEqual(mockClassRoom);
+    expect(component.formData).toEqual(mockClassRoom);
+  }));
+
+  it('ngOnInit deve alertar e navegar se id inválido', () => {
+    spyOn(window, 'alert');
+    const routeSpy = TestBed.inject(ActivatedRoute);
+    (routeSpy.snapshot.paramMap.get as jasmine.Spy).and.returnValue(null);
+
+    component.ngOnInit();
+
+    expect(window.alert).toHaveBeenCalledWith('ID inválido');
+    expect(router.navigate).toHaveBeenCalledWith(['/classrooms']);
   });
 
-  it('should emit submitForm event with correct data on handleSubmit', () => {
-    spyOn(component.submitForm, 'emit');
+  it('ngOnInit deve alertar e navegar se sala não encontrada', fakeAsync(() => {
+    spyOn(window, 'alert');
+    // Corrigido: usar undefined em vez de null
+    classRoomService.getById.and.returnValue(of(undefined));
 
-    component.formData.name = 'Sala B';
-    component.formData.capacity = 50;
+    component.ngOnInit();
+    tick();
+
+    expect(window.alert).toHaveBeenCalledWith('Sala não encontrada.');
+    expect(router.navigate).toHaveBeenCalledWith(['/classrooms']);
+  }));
+
+  it('ngOnInit deve alertar e navegar em caso de erro do service', fakeAsync(() => {
+    spyOn(window, 'alert');
+    classRoomService.getById.and.returnValue(throwError(() => new Error('Erro')));
+
+    component.ngOnInit();
+    tick();
+
+    expect(window.alert).toHaveBeenCalledWith('Erro ao carregar a sala.');
+    expect(router.navigate).toHaveBeenCalledWith(['/classrooms']);
+  }));
+
+  it('handleSubmit deve atualizar a sala, alertar e navegar', () => {
+    spyOn(window, 'alert');
+    component.classRoom = mockClassRoom;
+    component.formData = { name: 'Sala B', capacity: 50 };
 
     component.handleSubmit();
 
-    expect(component.submitForm.emit).toHaveBeenCalledWith({
+    expect(classRoomService.update).toHaveBeenCalledWith(jasmine.objectContaining({
       id: 1,
       name: 'Sala B',
-      capacity: 50,
-    });
+      capacity: 50
+    }));
+    expect(window.alert).toHaveBeenCalledWith('Sala atualizada com sucesso!');
+    expect(router.navigate).toHaveBeenCalledWith(['/classrooms']);
   });
 
-  it('should update formData when inputs change (two-way binding)', async () => {
-    await render(EditClassroomComponent, {
-      componentProperties: {
-        id: 2,
-        name: 'Sala C',
-        capacity: 20,
-      },
-      imports: [FormsModule],
-    });
+  it('handleSubmit não deve chamar update se classRoom for null', () => {
+    component.classRoom = null;
+    spyOn(classRoomService, 'update');
 
-    const nameInput = screen.getByLabelText('Nome') as HTMLInputElement;
-    const capacityInput = screen.getByLabelText('Capacidade') as HTMLInputElement;
+    component.handleSubmit();
 
-    // Simula digitação do usuário
-    fireEvent.input(nameInput, { target: { value: 'Sala D' } });
-    fireEvent.input(capacityInput, { target: { value: '40' } });
-
-    expect(nameInput.value).toBe('Sala D');
-    expect(capacityInput.value).toBe('40');
+    expect(classRoomService.update).not.toHaveBeenCalled();
   });
 
-  it('should call handleSubmit when form is submitted', async () => {
-    const { fixture } = await render(EditClassroomComponent, { imports: [FormsModule] });
-    const form = fixture.nativeElement.querySelector('form') as HTMLFormElement;
-
-    spyOn(fixture.componentInstance, 'handleSubmit');
-
-    form.dispatchEvent(new Event('submit'));
-    fixture.detectChanges();
-
-    expect(fixture.componentInstance.handleSubmit).toHaveBeenCalled();
+  it('cancel deve navegar para /classrooms', () => {
+    component.cancel();
+    expect(router.navigate).toHaveBeenCalledWith(['/classrooms']);
   });
 });

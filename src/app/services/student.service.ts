@@ -1,7 +1,7 @@
 // src/services/student.service.ts
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
-import { Student } from '../types/student.model'; // <-- Importa do model correto
+import { Student } from '../types/student.model';
 
 /** Dados para criar um novo estudante */
 export type StudentFormData = Omit<Student, 'id'>;

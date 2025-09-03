@@ -4,7 +4,7 @@ import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testin
 import { DeleteClassroomComponent } from './delete-classroom.component';
 import { Router } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { ClassRoomService } from '../../../services/classroom.service';
 import { CommonModule } from '@angular/common';
 import { ClassRoom } from '../../../types/classroom.model';
@@ -77,6 +77,40 @@ describe('DeleteClassroomComponent', () => {
     expect(component.classRoom).toEqual(mockClassRoom);
   }));
 
+  it('ngOnInit deve alertar e navegar se id inválido', () => {
+    spyOn(window, 'alert');
+    const routeSpy = TestBed.inject(ActivatedRoute);
+    (routeSpy.snapshot.paramMap.get as jasmine.Spy).and.returnValue(null);
+
+    component.ngOnInit();
+
+    expect(window.alert).toHaveBeenCalledWith('ID inválido');
+    expect(router.navigate).toHaveBeenCalledWith(['/classrooms']);
+  });
+
+  it('ngOnInit deve alertar e navegar se sala não encontrada', fakeAsync(() => {
+    spyOn(window, 'alert');
+    // Corrigido: usar undefined em vez de null
+    classRoomService.getById.and.returnValue(of(undefined));
+
+    component.ngOnInit();
+    tick();
+
+    expect(window.alert).toHaveBeenCalledWith('Sala não encontrada.');
+    expect(router.navigate).toHaveBeenCalledWith(['/classrooms']);
+  }));
+
+  it('ngOnInit deve alertar e navegar em caso de erro do service', fakeAsync(() => {
+    spyOn(window, 'alert');
+    classRoomService.getById.and.returnValue(throwError(() => new Error('Erro')));
+
+    component.ngOnInit();
+    tick();
+
+    expect(window.alert).toHaveBeenCalledWith('Erro ao carregar a sala.');
+    expect(router.navigate).toHaveBeenCalledWith(['/classrooms']);
+  }));
+
   it('getSubjectNames deve retornar nomes separados por vírgula', () => {
     expect(component.getSubjectNames(mockClassRoom.subjects)).toBe('Matemática, Física');
     expect(component.getSubjectNames([])).toBe('Nenhuma');
@@ -88,19 +122,27 @@ describe('DeleteClassroomComponent', () => {
     expect(classRoomService.delete).not.toHaveBeenCalled();
   });
 
-  it('handleDelete deve chamar delete e navegar se confirmado', () => {
+  it('handleDelete deve chamar delete, alert e navegar se confirmado', () => {
     spyOn(window, 'confirm').and.returnValue(true);
+    spyOn(window, 'alert');
     component.classRoom = mockClassRoom;
+
     component.handleDelete();
+
     expect(classRoomService.delete).toHaveBeenCalledWith(mockClassRoom.id);
+    expect(window.alert).toHaveBeenCalledWith('Sala excluída com sucesso!');
     expect(router.navigate).toHaveBeenCalledWith(['/classrooms']);
   });
 
   it('handleDelete não deve deletar se cancelado', () => {
     spyOn(window, 'confirm').and.returnValue(false);
+    spyOn(window, 'alert');
     component.classRoom = mockClassRoom;
+
     component.handleDelete();
+
     expect(classRoomService.delete).not.toHaveBeenCalled();
+    expect(window.alert).not.toHaveBeenCalled();
     expect(router.navigate).not.toHaveBeenCalled();
   });
 

@@ -68,55 +68,48 @@ describe('EnrollmentIndexComponent', () => {
     expect(component.students.length).toBe(2);
     expect(component.classRooms.length).toBe(2);
     expect(component.enrollments.length).toBe(3);
-    expect(component.data.items.length).toBe(2); // PAGE_SIZE = 2
   }));
 
-  it('should get student and classroom names', () => {
+  it('should return student and classroom names correctly', () => {
     expect(component.getStudentName(1)).toBe('Aluno A');
     expect(component.getStudentName(999)).toBe('Aluno não informado');
-
     expect(component.getClassRoomName(2)).toBe('Sala B');
     expect(component.getClassRoomName(999)).toBe('Turma não informada');
   });
 
-  it('should paginate correctly', () => {
-    component.currentPage = 2;
-    component.loadData();
-
-    expect(component.data.items.length).toBe(1);
-    expect(component.totalPages).toBe(2);
-  });
-
-  it('should filter by search string', () => {
+  it('should filter enrollments by status', () => {
     component.searchString = 'ativo';
-    component.loadData();
+    const filtered = component.filteredEnrollments;
 
-    expect(component.data.totalItems).toBe(2); // Apenas status 'Ativo'
-    expect(component.data.items.length).toBe(2); // PAGE_SIZE = 2
+    expect(filtered.length).toBe(2);
+    expect(filtered.every(e => e.status.toLowerCase().includes('ativo'))).toBeTrue();
   });
 
-  it('should reset page to 1 on search', () => {
-    component.currentPage = 2;
-    component.searchString = 'Inativo';
-    component.search();
-    expect(component.currentPage).toBe(1);
+  it('should return all enrollments if searchString is empty', () => {
+    component.searchString = '';
+    const filtered = component.filteredEnrollments;
+
+    expect(filtered.length).toBe(3);
   });
 
-  it('should go to specific page', () => {
-    component.goToPage(2);
-    expect(component.currentPage).toBe(2);
-  });
-
-  it('should render enrollment table correctly', async () => {
+  it('should render table headers and rows', async () => {
     await render(EnrollmentIndexComponent, {
       imports: [CommonModule, FormsModule],
       componentProperties: {},
     });
 
-    // Podemos checar a existência do header
     expect(screen.getByText('Aluno')).toBeTruthy();
     expect(screen.getByText('Turma')).toBeTruthy();
     expect(screen.getByText('Status')).toBeTruthy();
     expect(screen.getByText('Data da Matrícula')).toBeTruthy();
+  });
+
+  it('should display fallback text for missing student/classroom', () => {
+    component.enrollments.push({ id: 4, studentId: 999, classRoomId: 999, status: 'Ativo', enrollmentDate: '2025-08-23' });
+    const studentName = component.getStudentName(999);
+    const classRoomName = component.getClassRoomName(999);
+
+    expect(studentName).toBe('Aluno não informado');
+    expect(classRoomName).toBe('Turma não informada');
   });
 });

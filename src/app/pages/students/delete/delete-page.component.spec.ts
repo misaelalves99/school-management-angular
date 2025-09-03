@@ -10,10 +10,15 @@ describe('DeleteStudentComponent', () => {
   let component: DeleteStudentComponent;
   let fixture: ComponentFixture<DeleteStudentComponent>;
   let routerMock: Partial<Router>;
+  let studentServiceMock: any;
 
   beforeEach(async () => {
     routerMock = {
       navigate: jasmine.createSpy('navigate'),
+    };
+
+    studentServiceMock = {
+      delete: jasmine.createSpy('delete'),
     };
 
     const activatedRouteMock = {
@@ -29,11 +34,16 @@ describe('DeleteStudentComponent', () => {
       providers: [
         { provide: Router, useValue: routerMock },
         { provide: ActivatedRoute, useValue: activatedRouteMock },
+        { provide: 'StudentService', useValue: studentServiceMock },
       ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(DeleteStudentComponent);
     component = fixture.componentInstance;
+
+    // Forçar o serviço mock interno
+    (component as any).studentService = studentServiceMock;
+
     fixture.detectChanges();
   });
 
@@ -45,11 +55,21 @@ describe('DeleteStudentComponent', () => {
     expect(component.id).toBe('42');
   });
 
-  it('should navigate to /students when handleDelete is called', () => {
-    spyOn(window, 'alert'); // para não exibir o alert real
+  it('should call studentService.delete and navigate on handleDelete', () => {
+    spyOn(window, 'alert'); // para não exibir alert real
+
     component.handleDelete();
+
+    expect(studentServiceMock.delete).toHaveBeenCalledWith(42);
     expect(window.alert).toHaveBeenCalledWith('Aluno 42 excluído!');
     expect(routerMock.navigate).toHaveBeenCalledWith(['/students']);
+  });
+
+  it('should do nothing if id is null on handleDelete', () => {
+    component.id = null;
+    component.handleDelete();
+
+    expect(studentServiceMock.delete).not.toHaveBeenCalled();
   });
 
   it('should navigate to /students when cancel is called', () => {
@@ -57,7 +77,7 @@ describe('DeleteStudentComponent', () => {
     expect(routerMock.navigate).toHaveBeenCalledWith(['/students']);
   });
 
-  it('should render ID in template', async () => {
+  it('should render ID and buttons correctly', async () => {
     await render(DeleteStudentComponent, {
       imports: [CommonModule],
       providers: [
@@ -68,6 +88,7 @@ describe('DeleteStudentComponent', () => {
             snapshot: { paramMap: { get: () => '42' } },
           },
         },
+        { provide: 'StudentService', useValue: studentServiceMock },
       ],
     });
 

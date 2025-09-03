@@ -8,33 +8,26 @@ import { take } from 'rxjs/operators';
 describe('SubjectService', () => {
   let service: SubjectService;
 
-  const initialSubjects: Subject[] = [
-    { id: 1, name: 'Matemática', description: 'Matemática básica', workloadHours: 60 },
-    { id: 2, name: 'Física', description: 'Física básica', workloadHours: 60 },
-  ];
-
   beforeEach(() => {
     TestBed.configureTestingModule({});
     service = TestBed.inject(SubjectService);
-
-    // Popula dados iniciais
-    initialSubjects.forEach(s => service.add(s));
   });
 
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
 
-  it('should return all subjects', (done) => {
+  it('should return initial subjects', (done) => {
     service.getAll().pipe(take(1)).subscribe(subjects => {
-      expect(subjects).toEqual(initialSubjects);
+      expect(subjects.length).toBe(4); // Pelo mock inicial do service
+      expect(subjects[0].name).toBe('Matemática');
       done();
     });
   });
 
-  it('should return subject by id', (done) => {
+  it('should get subject by id', (done) => {
     service.getById(2).subscribe(subject => {
-      expect(subject).toEqual(initialSubjects[1]);
+      expect(subject?.name).toBe('História');
       done();
     });
   });
@@ -47,21 +40,21 @@ describe('SubjectService', () => {
   });
 
   it('should add a new subject', (done) => {
-    const newSubject: Subject = { id: 3, name: 'Química', description: 'Química básica', workloadHours: 60 };
+    const newSubject: Subject = { id: 5, name: 'Geografia', description: 'Geografia básica', workloadHours: 50 };
     service.add(newSubject);
 
     service.getAll().pipe(take(1)).subscribe(subjects => {
-      expect(subjects.length).toBe(3);
-      expect(subjects).toContain(newSubject);
+      expect(subjects.length).toBe(5);
+      expect(subjects.find(s => s.id === 5)).toEqual(newSubject);
       done();
     });
   });
 
   it('should update existing subject', (done) => {
-    const updated: Subject = { ...initialSubjects[0], name: 'Matemática Avançada' };
+    const updated: Subject = { ...service.snapshot()[0], name: 'Matemática Avançada' };
     service.update(updated);
 
-    service.getById(1).subscribe(subject => {
+    service.getById(updated.id).subscribe(subject => {
       expect(subject?.name).toBe('Matemática Avançada');
       done();
     });
@@ -72,17 +65,18 @@ describe('SubjectService', () => {
     service.update(updated);
 
     service.getAll().pipe(take(1)).subscribe(subjects => {
-      expect(subjects.length).toBe(2);
+      expect(subjects.length).toBe(4); // mock inicial permanece
       done();
     });
   });
 
   it('should delete subject by id', (done) => {
-    service.delete(1);
+    const idToDelete = service.snapshot()[0].id;
+    service.delete(idToDelete);
 
     service.getAll().pipe(take(1)).subscribe(subjects => {
-      expect(subjects.find(s => s.id === 1)).toBeUndefined();
-      expect(subjects.length).toBe(1);
+      expect(subjects.find(s => s.id === idToDelete)).toBeUndefined();
+      expect(subjects.length).toBe(3);
       done();
     });
   });
@@ -91,8 +85,14 @@ describe('SubjectService', () => {
     service.delete(999);
 
     service.getAll().pipe(take(1)).subscribe(subjects => {
-      expect(subjects.length).toBe(2);
+      expect(subjects.length).toBe(4);
       done();
     });
+  });
+
+  it('should return snapshot of current subjects', () => {
+    const snapshot = service.snapshot();
+    expect(snapshot.length).toBe(4);
+    expect(snapshot[0].name).toBe('Matemática');
   });
 });

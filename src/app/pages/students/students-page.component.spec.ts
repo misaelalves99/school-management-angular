@@ -1,7 +1,7 @@
 // src/pages/students/students-page.component.spec.ts
 
 import { render, screen, fireEvent } from '@testing-library/angular';
-import { StudentsPageComponent } from './students-page.component';
+import { StudentsPageComponent, mockStudents } from './students-page.component';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 
@@ -9,78 +9,57 @@ describe('StudentsPageComponent', () => {
   it('should create the component and render initial students', async () => {
     await render(StudentsPageComponent, { imports: [FormsModule, RouterModule] });
 
-    expect(screen.getByText('João Silva')).toBeTruthy();
-    expect(screen.getByText('Maria Oliveira')).toBeTruthy();
-    expect(screen.getByText('Carlos Santos')).toBeTruthy();
+    mockStudents.forEach(s => {
+      expect(screen.getByText(s.name)).toBeTruthy();
+      expect(screen.getByText(s.enrollmentNumber)).toBeTruthy();
+    });
   });
 
-  it('should filter students by search', async () => {
-    const componentRef = await render(StudentsPageComponent, { imports: [FormsModule, RouterModule] });
+  it('should filter students by search term', async () => {
+    await render(StudentsPageComponent, { imports: [FormsModule, RouterModule] });
+
     const input = screen.getByPlaceholderText('Digite o nome...');
     fireEvent.input(input, { target: { value: 'Maria' } });
 
-    const form = screen.getByRole('form');
+    // Submeter o formulário de busca
+    const form = input.closest('form')!;
     fireEvent.submit(form);
 
     expect(screen.queryByText('João Silva')).toBeNull();
     expect(screen.getByText('Maria Oliveira')).toBeTruthy();
+    expect(screen.queryByText('Carlos Santos')).toBeNull();
   });
 
-  it('should paginate students', async () => {
-    const longMockStudents = Array.from({ length: 15 }, (_, i) => ({
-      id: i + 1,
-      name: `Aluno ${i + 1}`,
-      enrollmentNumber: `202300${i + 1}`,
-      phone: '123',
-      address: 'Rua Teste',
-    }));
+  it('should show "Nenhum aluno encontrado" if search yields no results', async () => {
+    await render(StudentsPageComponent, { imports: [FormsModule, RouterModule] });
 
-    const { fixture } = await render(StudentsPageComponent, { imports: [FormsModule, RouterModule] });
-    const componentInstance = fixture.componentInstance;
+    const input = screen.getByPlaceholderText('Digite o nome...');
+    fireEvent.input(input, { target: { value: 'XYZ' } });
 
-    // Mock do método updateStudents para preencher students
-    spyOn(componentInstance, 'updateStudents').and.callFake(() => {
-      const filtered = longMockStudents.filter(s =>
-        s.name.toLowerCase().includes(componentInstance.search.toLowerCase())
-      );
-      const start = (componentInstance.page - 1) * componentInstance.pageSize;
-      componentInstance.students = filtered.slice(start, start + componentInstance.pageSize);
-      componentInstance.totalPages = Math.ceil(filtered.length / componentInstance.pageSize);
-    });
+    const form = input.closest('form')!;
+    fireEvent.submit(form);
 
-    componentInstance.pageSize = 10;
-    componentInstance.page = 1;
-    componentInstance.updateStudents();
-
-    // Página inicial
-    expect(componentInstance.students.length).toBe(10);
-
-    componentInstance.nextPage();
-    componentInstance.updateStudents();
-    expect(componentInstance.page).toBe(2);
-    expect(componentInstance.students.length).toBe(5);
-
-    componentInstance.prevPage();
-    componentInstance.updateStudents();
-    expect(componentInstance.page).toBe(1);
-    expect(componentInstance.students.length).toBe(10);
+    expect(screen.getByText('Nenhum aluno encontrado.')).toBeTruthy();
   });
 
-  it('should not go to previous page if already on first page', async () => {
-    const { fixture } = await render(StudentsPageComponent, { imports: [FormsModule, RouterModule] });
-    const componentInstance = fixture.componentInstance;
+  it('should render action buttons with correct links', async () => {
+    await render(StudentsPageComponent, { imports: [FormsModule, RouterModule] });
 
-    componentInstance.page = 1;
-    componentInstance.prevPage();
-    expect(componentInstance.page).toBe(1);
+    const student = mockStudents[0];
+    const detalhesLink = screen.getByText('Detalhes').closest('a')!;
+    const editarLink = screen.getByText('Editar').closest('a')!;
+    const excluirLink = screen.getByText('Excluir').closest('a')!;
+
+    expect(detalhesLink.getAttribute('href')).toContain(`/students/details/${student.id}`);
+    expect(editarLink.getAttribute('href')).toContain(`/students/edit/${student.id}`);
+    expect(excluirLink.getAttribute('href')).toContain(`/students/delete/${student.id}`);
   });
 
-  it('should not go to next page if already on last page', async () => {
-    const { fixture } = await render(StudentsPageComponent, { imports: [FormsModule, RouterModule] });
-    const componentInstance = fixture.componentInstance;
+  it('should render "Cadastrar Novo Aluno" button', async () => {
+    await render(StudentsPageComponent, { imports: [FormsModule, RouterModule] });
 
-    componentInstance.page = componentInstance.totalPages;
-    componentInstance.nextPage();
-    expect(componentInstance.page).toBe(componentInstance.totalPages);
+    const createButton = screen.getByText('Cadastrar Novo Aluno').closest('a')!;
+    expect(createButton).toBeTruthy();
+    expect(createButton.getAttribute('href')).toBe('/students/create');
   });
 });

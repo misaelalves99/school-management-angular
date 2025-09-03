@@ -1,5 +1,7 @@
 // src/pages/enrollments/edit/edit-enrollment.component.ts
 
+// src/pages/enrollments/edit/edit-enrollment.component.ts
+
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
@@ -34,7 +36,6 @@ export class EditEnrollmentComponent implements OnInit {
   enrollment!: Enrollment;
   students: Student[] = [];
   classRooms: ClassRoom[] = [];
-
   formData!: Enrollment;
   errors: ValidationErrors = {};
 
@@ -58,7 +59,6 @@ export class EditEnrollmentComponent implements OnInit {
       this.formData = { ...e };
     });
 
-    // Carregar alunos e salas
     this.studentService.getAll().subscribe(students => this.students = students);
     this.classRoomService.getAll().subscribe(classRooms => this.classRooms = classRooms);
   }

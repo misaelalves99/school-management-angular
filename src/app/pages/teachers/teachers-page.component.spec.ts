@@ -14,12 +14,16 @@ describe('TeachersPageComponent', () => {
     { id: 3, name: 'Pedro', email: 'pedro@email.com', subject: 'Química', phone: '', address: '', dateOfBirth: '', photoUrl: '' },
   ];
 
-  const teacherServiceMock = {
-    getAll: jasmine.createSpy('getAll').and.returnValue(of(teacherList))
-  };
-  const routerMock = { navigate: jasmine.createSpy('navigate') };
+  let teacherServiceMock: any;
+  let routerMock: any;
 
   beforeEach(() => {
+    teacherServiceMock = {
+      getAll: jasmine.createSpy('getAll').and.returnValue(of(teacherList))
+    };
+
+    routerMock = { navigate: jasmine.createSpy('navigate') };
+
     spyOn(window, 'alert');
   });
 
@@ -34,6 +38,7 @@ describe('TeachersPageComponent', () => {
     expect(teacherServiceMock.getAll).toHaveBeenCalled();
     expect(screen.getByText('João')).toBeTruthy();
     expect(screen.getByText('Maria')).toBeTruthy();
+    expect(screen.getByText('Pedro')).toBeTruthy();
   });
 
   it('should alert on load error', async () => {
@@ -64,57 +69,6 @@ describe('TeachersPageComponent', () => {
     expect(component.filteredTeachers[0].name).toBe('Maria');
   });
 
-  it('should paginate correctly', async () => {
-    const { fixture } = await render(TeachersPageComponent, {
-      providers: [
-        { provide: TeacherService, useValue: teacherServiceMock },
-        { provide: Router, useValue: routerMock },
-      ]
-    });
-
-    const component = fixture.componentInstance;
-    expect(component.totalPages).toBe(2); // PAGE_SIZE = 2
-    expect(component.currentItems.length).toBe(2);
-
-    component.goToPage(2);
-    expect(component.currentPage).toBe(2);
-    expect(component.currentItems.length).toBe(1);
-
-    // invalid pages
-    component.goToPage(0);
-    expect(component.currentPage).toBe(2);
-    component.goToPage(3);
-    expect(component.currentPage).toBe(2);
-  });
-
-  it('should reset page on search change', async () => {
-    const { fixture } = await render(TeachersPageComponent, {
-      providers: [
-        { provide: TeacherService, useValue: teacherServiceMock },
-        { provide: Router, useValue: routerMock },
-      ]
-    });
-
-    const component = fixture.componentInstance;
-    component.currentPage = 2;
-    component.searchTerm = 'Maria';
-    component.onSearchChange();
-    expect(component.currentPage).toBe(1);
-  });
-
-  it('should navigate to given path', async () => {
-    const { fixture } = await render(TeachersPageComponent, {
-      providers: [
-        { provide: TeacherService, useValue: teacherServiceMock },
-        { provide: Router, useValue: routerMock },
-      ]
-    });
-
-    const component = fixture.componentInstance;
-    component.navigateTo('/teachers/create');
-    expect(routerMock.navigate).toHaveBeenCalledWith(['/teachers/create']);
-  });
-
   it('should display "Nenhum professor encontrado" when filtered list is empty', async () => {
     const { fixture } = await render(TeachersPageComponent, {
       providers: [
@@ -129,5 +83,18 @@ describe('TeachersPageComponent', () => {
     fixture.detectChanges();
 
     expect(screen.getByText('Nenhum professor encontrado.')).toBeTruthy();
+  });
+
+  it('should navigate to given path', async () => {
+    const { fixture } = await render(TeachersPageComponent, {
+      providers: [
+        { provide: TeacherService, useValue: teacherServiceMock },
+        { provide: Router, useValue: routerMock },
+      ]
+    });
+
+    const component = fixture.componentInstance;
+    component.navigateTo('/teachers/create');
+    expect(routerMock.navigate).toHaveBeenCalledWith(['/teachers/create']);
   });
 });

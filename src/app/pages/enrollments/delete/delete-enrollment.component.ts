@@ -14,7 +14,7 @@ import { ClassRoom } from '../../../types/classroom.model';
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './delete-enrollment.component.html',
-  styleUrls: ['./delete-enrollment.component.css']
+  styleUrls: ['./delete-enrollment.component.css'],
 })
 export class DeleteEnrollmentComponent implements OnInit {
   private enrollmentService = inject(EnrollmentService);
@@ -37,16 +37,26 @@ export class DeleteEnrollmentComponent implements OnInit {
       return;
     }
 
-    this.enrollmentService.getById(id).subscribe(enrollment => {
-      if (!enrollment) {
-        alert('Matrícula não encontrada');
-        this.router.navigate(['/enrollments']);
-        return;
-      }
-      this.enrollment = enrollment;
+    this.enrollmentService.getById(id).subscribe({
+      next: (enrollment) => {
+        if (!enrollment) {
+          alert('Matrícula não encontrada');
+          this.router.navigate(['/enrollments']);
+          return;
+        }
+        this.enrollment = enrollment;
 
-      this.studentService.getById(enrollment.studentId).subscribe(s => this.student = s ?? null);
-      this.classRoomService.getById(enrollment.classRoomId).subscribe(c => this.classRoom = c ?? null);
+        this.studentService.getById(enrollment.studentId).subscribe({
+          next: (s) => (this.student = s ?? null),
+        });
+        this.classRoomService.getById(enrollment.classRoomId).subscribe({
+          next: (c) => (this.classRoom = c ?? null),
+        });
+      },
+      error: () => {
+        alert('Erro ao carregar matrícula.');
+        this.router.navigate(['/enrollments']);
+      },
     });
   }
 

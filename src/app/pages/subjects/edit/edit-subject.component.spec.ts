@@ -4,13 +4,20 @@ import { render, screen, fireEvent } from '@testing-library/angular';
 import { EditSubjectComponent } from './edit-subject.component';
 import { Router } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 
 describe('EditSubjectComponent', () => {
+  let mockRouter: Partial<Router>;
+
+  beforeEach(() => {
+    mockRouter = { navigate: jasmine.createSpy('navigate') };
+  });
 
   it('should create the component and display initial data', async () => {
     await render(EditSubjectComponent, {
+      imports: [FormsModule],
       providers: [
-        { provide: Router, useValue: { navigate: jasmine.createSpy('navigate') } },
+        { provide: Router, useValue: mockRouter },
         { provide: ActivatedRoute, useValue: { snapshot: { paramMap: { get: () => '1' } } } }
       ]
     });
@@ -18,12 +25,12 @@ describe('EditSubjectComponent', () => {
     expect(screen.getByText('Editar Disciplina')).toBeTruthy();
     expect((screen.getByLabelText('Nome da Disciplina') as HTMLInputElement).value).toBe('Matemática');
     expect((screen.getByLabelText('Descrição') as HTMLTextAreaElement).value).toBe('Disciplina de matemática básica');
+    expect((screen.getByLabelText('Carga Horária (horas)') as HTMLInputElement).value).toBe('60');
   });
 
   it('should display validation error if name is empty', async () => {
-    const mockRouter = { navigate: jasmine.createSpy('navigate') };
-
-    const component = await render(EditSubjectComponent, {
+    await render(EditSubjectComponent, {
+      imports: [FormsModule],
       providers: [
         { provide: Router, useValue: mockRouter },
         { provide: ActivatedRoute, useValue: { snapshot: { paramMap: { get: () => '1' } } } }
@@ -41,26 +48,29 @@ describe('EditSubjectComponent', () => {
     expect(mockRouter.navigate).not.toHaveBeenCalled();
   });
 
-  it('should navigate back when back button is clicked', async () => {
-    const mockRouter = { navigate: jasmine.createSpy('navigate') };
-
+  it('should display validation error if workloadHours is invalid', async () => {
     await render(EditSubjectComponent, {
+      imports: [FormsModule],
       providers: [
         { provide: Router, useValue: mockRouter },
         { provide: ActivatedRoute, useValue: { snapshot: { paramMap: { get: () => '1' } } } }
       ]
     });
 
-    const backButton = screen.getByText('Voltar à Lista');
-    fireEvent.click(backButton);
+    const workloadInput = screen.getByLabelText('Carga Horária (horas)') as HTMLInputElement;
+    workloadInput.value = '0';
+    fireEvent.input(workloadInput);
 
-    expect(mockRouter.navigate).toHaveBeenCalledWith(['/subjects']);
+    const submitButton = screen.getByText('Salvar Alterações');
+    fireEvent.click(submitButton);
+
+    expect(screen.getByText('A carga horária deve ser maior que zero.')).toBeTruthy();
+    expect(mockRouter.navigate).not.toHaveBeenCalled();
   });
 
   it('should navigate after successful submit', async () => {
-    const mockRouter = { navigate: jasmine.createSpy('navigate') };
-
     await render(EditSubjectComponent, {
+      imports: [FormsModule],
       providers: [
         { provide: Router, useValue: mockRouter },
         { provide: ActivatedRoute, useValue: { snapshot: { paramMap: { get: () => '1' } } } }
@@ -73,4 +83,18 @@ describe('EditSubjectComponent', () => {
     expect(mockRouter.navigate).toHaveBeenCalledWith(['/subjects']);
   });
 
+  it('should navigate back when back button is clicked', async () => {
+    await render(EditSubjectComponent, {
+      imports: [FormsModule],
+      providers: [
+        { provide: Router, useValue: mockRouter },
+        { provide: ActivatedRoute, useValue: { snapshot: { paramMap: { get: () => '1' } } } }
+      ]
+    });
+
+    const backButton = screen.getByText('Voltar');
+    fireEvent.click(backButton);
+
+    expect(mockRouter.navigate).toHaveBeenCalledWith(['/subjects']);
+  });
 });

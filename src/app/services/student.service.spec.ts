@@ -1,40 +1,32 @@
 // src/services/student.service.spec.ts
 
 import { TestBed } from '@angular/core/testing';
-import { StudentService } from './student.service';
-import { Student } from '../types/student.model';
+import { StudentService, StudentFormData } from './student.service';
 import { take } from 'rxjs/operators';
 
 describe('StudentService', () => {
   let service: StudentService;
 
-  const initialStudents: Student[] = [
-    { id: 1, name: 'Aluno 1', enrollmentNumber: '20230001', phone: '123456789', address: 'Rua A' },
-    { id: 2, name: 'Aluno 2', enrollmentNumber: '20230002', phone: '987654321', address: 'Rua B' },
-  ];
-
   beforeEach(() => {
     TestBed.configureTestingModule({});
     service = TestBed.inject(StudentService);
-
-    // Preenche os dados iniciais
-    initialStudents.forEach(s => service.add(s));
   });
 
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
 
-  it('should return all students', (done) => {
+  it('should return initial students', (done) => {
     service.getAll().pipe(take(1)).subscribe((students) => {
-      expect(students).toEqual(initialStudents);
+      expect(students.length).toBe(2);
+      expect(students[0].name).toBe('João Silva');
       done();
     });
   });
 
-  it('should return student by id', (done) => {
+  it('should get student by id', (done) => {
     service.getById(2).subscribe((student) => {
-      expect(student).toEqual(initialStudents[1]);
+      expect(student?.name).toBe('Maria Souza');
       done();
     });
   });
@@ -46,65 +38,67 @@ describe('StudentService', () => {
     });
   });
 
-  it('should add a new student', (done) => {
-    const newStudent: Student = {
-      id: 3,
-      name: 'Aluno 3',
+  it('should create a new student', (done) => {
+    const newStudentData: StudentFormData = {
+      name: 'Carlos',
+      email: 'carlos@email.com',
+      dateOfBirth: '2001-06-15',
       enrollmentNumber: '20230003',
       phone: '555555555',
-      address: 'Rua C'
+      address: 'Rua C',
     };
-    service.add(newStudent);
+    service.create(newStudentData).subscribe((newStudent) => {
+      expect(newStudent.id).toBeGreaterThan(0);
+      expect(newStudent.name).toBe('Carlos');
 
-    service.getAll().pipe(take(1)).subscribe((students) => {
-      expect(students.length).toBe(3);
-      expect(students).toContain(newStudent);
-      done();
+      service.getAll().pipe(take(1)).subscribe((all) => {
+        expect(all.length).toBe(3);
+        expect(all.find(s => s.id === newStudent.id)).toBeTruthy();
+        done();
+      });
     });
   });
 
   it('should update existing student', (done) => {
-    const updated: Student = { ...initialStudents[0], name: 'Aluno 1 Atualizado' };
-    service.update(updated);
+    service.update(1, { name: 'João Atualizado' }).subscribe((updated) => {
+      expect(updated?.name).toBe('João Atualizado');
 
-    service.getById(1).subscribe((student) => {
-      expect(student?.name).toBe('Aluno 1 Atualizado');
-      done();
+      service.getById(1).subscribe((s) => {
+        expect(s?.name).toBe('João Atualizado');
+        done();
+      });
     });
   });
 
-  it('should not update non-existent student', (done) => {
-    const updated: Student = {
-      id: 999,
-      name: 'Não Existe',
-      enrollmentNumber: '99999999',
-      phone: '000000000',
-      address: 'Rua X'
-    };
-    service.update(updated);
-
-    service.getAll().pipe(take(1)).subscribe((students) => {
-      expect(students.length).toBe(2);
+  it('should return null when updating non-existent student', (done) => {
+    service.update(999, { name: 'Não Existe' }).subscribe((updated) => {
+      expect(updated).toBeNull();
       done();
     });
   });
 
   it('should delete student by id', (done) => {
-    service.delete(1);
-
-    service.getAll().pipe(take(1)).subscribe((students) => {
-      expect(students.find(s => s.id === 1)).toBeUndefined();
-      expect(students.length).toBe(1);
-      done();
+    service.delete(1).subscribe(() => {
+      service.getAll().pipe(take(1)).subscribe((students) => {
+        expect(students.find(s => s.id === 1)).toBeUndefined();
+        expect(students.length).toBe(1);
+        done();
+      });
     });
   });
 
   it('should do nothing when deleting non-existent id', (done) => {
-    service.delete(999);
-
-    service.getAll().pipe(take(1)).subscribe((students) => {
-      expect(students.length).toBe(2);
-      done();
+    service.delete(999).subscribe(() => {
+      service.getAll().pipe(take(1)).subscribe((students) => {
+        expect(students.length).toBe(2);
+        done();
+      });
     });
+  });
+
+  it('should return snapshot of current students', () => {
+    const snapshot = service.snapshot();
+    expect(snapshot.length).toBe(2);
+    expect(snapshot[0].name).toBe('João Silva');
   });
 });
