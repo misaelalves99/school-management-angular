@@ -1,5 +1,6 @@
 <!-- src/pages/subjects/subjects-index.component.html -->
 
+
 <div class="pageContainer">
   <div class="leftPanel">
     <h2 class="title">Buscar Disciplinas</h2>
@@ -22,6 +23,7 @@
     <table class="table">
       <thead>
         <tr>
+          <th>ID</th>
           <th>Nome</th>
           <th>Descrição</th>
           <th>Carga Horária</th>
@@ -30,9 +32,10 @@
       </thead>
       <tbody>
         <tr *ngIf="filtered.length === 0">
-          <td colspan="4" style="text-align:center; padding:20px;">Nenhuma disciplina encontrada.</td>
+          <td colspan="5" style="text-align:center; padding:20px;">Nenhuma disciplina encontrada.</td>
         </tr>
         <tr *ngFor="let subject of filtered">
+          <td>{{ subject.id }}</td>
           <td>{{ subject.name }}</td>
           <td>{{ subject.description }}</td>
           <td>{{ subject.workloadHours }}</td>

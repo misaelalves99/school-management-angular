@@ -1,17 +1,17 @@
 <!-- src/pages/enrollments/edit/edit-enrollment.component.html -->
 
-<div class="createContainer">
+<div class="createContainer" *ngIf="formData.id">
   <h1 class="createTitle">Editar Matrícula</h1>
 
   <form (ngSubmit)="handleSubmit()" class="createForm">
-    <input type="hidden" [value]="formData.id" />
+    <input type="hidden" name="id" [(ngModel)]="formData.id" />
 
     <!-- Aluno -->
     <div class="formGroup">
       <label for="studentId" class="formLabel">Aluno</label>
       <select id="studentId" name="studentId" [(ngModel)]="formData.studentId" class="formInput">
-        <option value="">Selecione um aluno</option>
-        <option *ngFor="let s of students" [value]="s.id">{{ s.name }}</option>
+        <option value="0">Selecione um aluno</option>
+        <option *ngFor="let s of students" [ngValue]="s.id">{{ s.name }}</option>
       </select>
       <span *ngIf="errors.studentId" class="formError">{{ errors.studentId }}</span>
     </div>
@@ -20,8 +20,8 @@
     <div class="formGroup">
       <label for="classRoomId" class="formLabel">Turma</label>
       <select id="classRoomId" name="classRoomId" [(ngModel)]="formData.classRoomId" class="formInput">
-        <option value="">Selecione uma turma</option>
-        <option *ngFor="let c of classRooms" [value]="c.id">{{ c.name }}</option>
+        <option value="0">Selecione uma turma</option>
+        <option *ngFor="let c of classRooms" [ngValue]="c.id">{{ c.name }}</option>
       </select>
       <span *ngIf="errors.classRoomId" class="formError">{{ errors.classRoomId }}</span>
     </div>

@@ -1,22 +1,23 @@
+// src/pages/enrollments/delete/delete-enrollment.component.spec.ts
+
 import { TestBed, ComponentFixture, fakeAsync, tick } from '@angular/core/testing';
 import { DeleteEnrollmentComponent } from './delete-enrollment.component';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { of } from 'rxjs';
-import { EnrollmentService } from '../../../services/enrollment.service';
+import { of, throwError } from 'rxjs';
+import { EnrollmentService, Enrollment } from '../../../services/enrollment.service';
 import { StudentService } from '../../../services/student.service';
 import { ClassRoomService } from '../../../services/classroom.service';
 import { Student } from '../../../types/student.model';
 import { ClassRoom } from '../../../types/classroom.model';
-import { Enrollment } from '../../../services/enrollment.service';
 
 describe('DeleteEnrollmentComponent', () => {
   let component: DeleteEnrollmentComponent;
   let fixture: ComponentFixture<DeleteEnrollmentComponent>;
-  let routerMock: Partial<Router>;
-  let enrollmentServiceMock: Partial<EnrollmentService>;
-  let studentServiceMock: Partial<StudentService>;
-  let classRoomServiceMock: Partial<ClassRoomService>;
+  let routerMock: jasmine.SpyObj<Router>;
+  let enrollmentServiceMock: jasmine.SpyObj<EnrollmentService>;
+  let studentServiceMock: jasmine.SpyObj<StudentService>;
+  let classRoomServiceMock: jasmine.SpyObj<ClassRoomService>;
 
   const enrollment: Enrollment = {
     id: 1,
@@ -47,13 +48,19 @@ describe('DeleteEnrollmentComponent', () => {
   };
 
   beforeEach(async () => {
-    routerMock = { navigate: jasmine.createSpy('navigate') };
-    enrollmentServiceMock = {
-      getById: jasmine.createSpy('getById').and.returnValue(of(enrollment)),
-      delete: jasmine.createSpy('delete').and.returnValue(of({})),
-    };
-    studentServiceMock = { getById: jasmine.createSpy('getById').and.returnValue(of(student)) };
-    classRoomServiceMock = { getById: jasmine.createSpy('getById').and.returnValue(of(classRoom)) };
+    routerMock = jasmine.createSpyObj('Router', ['navigate']);
+    enrollmentServiceMock = jasmine.createSpyObj('EnrollmentService', ['getById', 'delete']);
+    studentServiceMock = jasmine.createSpyObj('StudentService', ['getById']);
+    classRoomServiceMock = jasmine.createSpyObj('ClassRoomService', ['getById']);
+
+    // ✅ Correto: delete retorna Observable<void>
+    enrollmentServiceMock.delete.and.returnValue(of(void 0));
+
+    // ✅ Correto: getById retorna Observable<Enrollment | undefined>
+    enrollmentServiceMock.getById.and.returnValue(of(enrollment));
+
+    studentServiceMock.getById.and.returnValue(of(student));
+    classRoomServiceMock.getById.and.returnValue(of(classRoom));
 
     await TestBed.configureTestingModule({
       imports: [CommonModule, DeleteEnrollmentComponent],
@@ -62,6 +69,10 @@ describe('DeleteEnrollmentComponent', () => {
         { provide: EnrollmentService, useValue: enrollmentServiceMock },
         { provide: StudentService, useValue: studentServiceMock },
         { provide: ClassRoomService, useValue: classRoomServiceMock },
+        {
+          provide: ActivatedRoute,
+          useValue: { snapshot: { paramMap: new Map([['id', '1']]) } },
+        },
       ],
     }).compileComponents();
 
@@ -77,12 +88,46 @@ describe('DeleteEnrollmentComponent', () => {
   it('ngOnInit deve carregar matrícula, aluno e turma', fakeAsync(() => {
     component.ngOnInit();
     tick();
-    expect(enrollmentServiceMock.getById).toHaveBeenCalled();
+    expect(enrollmentServiceMock.getById).toHaveBeenCalledWith(1);
     expect(studentServiceMock.getById).toHaveBeenCalledWith(enrollment.studentId);
     expect(classRoomServiceMock.getById).toHaveBeenCalledWith(enrollment.classRoomId);
     expect(component.enrollment).toEqual(enrollment);
     expect(component.student).toEqual(student);
     expect(component.classRoom).toEqual(classRoom);
+  }));
+
+  it('ngOnInit deve redirecionar se ID inválido', () => {
+    const route = TestBed.inject(ActivatedRoute) as any;
+    route.snapshot.paramMap = new Map(); // id ausente
+
+    spyOn(window, 'alert');
+
+    component.ngOnInit();
+
+    expect(window.alert).toHaveBeenCalledWith('ID inválido');
+    expect(routerMock.navigate).toHaveBeenCalledWith(['/enrollments']);
+  });
+
+  it('ngOnInit deve redirecionar se matrícula não encontrada', fakeAsync(() => {
+    enrollmentServiceMock.getById.and.returnValue(of(undefined));
+    spyOn(window, 'alert');
+
+    component.ngOnInit();
+    tick();
+
+    expect(window.alert).toHaveBeenCalledWith('Matrícula não encontrada');
+    expect(routerMock.navigate).toHaveBeenCalledWith(['/enrollments']);
+  }));
+
+  it('ngOnInit deve redirecionar em caso de erro no serviço', fakeAsync(() => {
+    enrollmentServiceMock.getById.and.returnValue(throwError(() => new Error('Erro')));
+    spyOn(window, 'alert');
+
+    component.ngOnInit();
+    tick();
+
+    expect(window.alert).toHaveBeenCalledWith('Erro ao carregar matrícula.');
+    expect(routerMock.navigate).toHaveBeenCalledWith(['/enrollments']);
   }));
 
   it('handleDelete deve chamar delete e navegar se confirmado', fakeAsync(() => {
@@ -96,6 +141,7 @@ describe('DeleteEnrollmentComponent', () => {
     tick();
 
     expect(enrollmentServiceMock.delete).toHaveBeenCalledWith(enrollment.id);
+    expect(window.alert).toHaveBeenCalledWith(`Matrícula do aluno ${student.name} excluída com sucesso!`);
     expect(routerMock.navigate).toHaveBeenCalledWith(['/enrollments']);
   }));
 

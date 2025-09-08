@@ -4,32 +4,6 @@
   <h1 class="title">Excluir Sala</h1>
   <p class="warning">Tem certeza que deseja excluir esta sala?</p>
 
-  <div class="details">
-    <dl>
-      <dt>Nome</dt>
-      <dd>{{ classRoom.name }}</dd>
-
-      <dt>Capacidade</dt>
-      <dd>{{ classRoom.capacity }}</dd>
-
-      <dt>Horário</dt>
-      <dd>{{ classRoom.schedule }}</dd>
-
-      <dt>Professor(a)</dt>
-      <dd>{{ classRoom.classTeacher?.name || 'Nenhum' }}</dd>
-
-      <dt>Disciplinas</dt>
-      <dd>
-        <ng-container *ngIf="classRoom.subjects && classRoom.subjects.length; else noSubjects">
-          {{ getSubjectNames(classRoom.subjects) }}
-        </ng-container>
-        <ng-template #noSubjects>
-          <span class="muted">Nenhuma</span>
-        </ng-template>
-      </dd>
-    </dl>
-  </div>
-
   <div class="actions">
     <button class="btnDanger" (click)="handleDelete()">Excluir</button>
     <button class="btnSecondary" (click)="cancel()">Cancelar</button>

@@ -4,12 +4,6 @@
   <h1 class="title">Excluir Matrícula</h1>
   <h3 class="warning">Tem certeza que deseja excluir esta matrícula?</h3>
 
-  <div class="detailsContainer">
-    <h4>Aluno: {{ student?.name || 'Aluno não informado' }}</h4>
-    <p>Turma: {{ classRoom?.name || 'Turma não informada' }}</p>
-    <p>Data da Matrícula: {{ enrollment.enrollmentDate | date:'shortDate' }}</p>
-  </div>
-
   <div class="formActions">
     <button type="button" class="btnDanger" (click)="handleDelete()">Excluir</button>
     <button type="button" class="btnSecondary" (click)="cancel()">Cancelar</button>

@@ -4,11 +4,6 @@
   <h1 class="title">Excluir Disciplina</h1>
   <h3 class="warning">Tem certeza que deseja excluir esta disciplina?</h3>
 
-  <div class="subjectBox" *ngIf="subject">
-    <h4>{{ subject.name }}</h4>
-    <p>Carga Horária: {{ subject.workloadHours }} horas</p>
-  </div>
-
   <div class="actions">
     <button type="button" class="btnDanger" (click)="handleDelete()">Excluir</button>
     <button type="button" class="btnSecondary" (click)="cancel()">Cancelar</button>

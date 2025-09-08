@@ -3,9 +3,10 @@
 import { render, screen, fireEvent } from '@testing-library/angular';
 import { DetailsSubjectComponent } from './details-subject.component';
 import { Router } from '@angular/router';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, ParamMap, UrlSegment } from '@angular/router';
 import { SubjectService } from '../../../services/subject.service';
 import { of } from 'rxjs';
+
 
 describe('DetailsSubjectComponent', () => {
   let mockRouter: Partial<Router>;
@@ -13,25 +14,39 @@ describe('DetailsSubjectComponent', () => {
 
   beforeEach(() => {
     mockRouter = { navigate: jasmine.createSpy('navigate') };
+
+    // Mock do SubjectService com lista completa para getAll()
     mockSubjectService = {
-      getById: jasmine.createSpy('getById').and.callFake((id: number) => {
-        if (id === 999) return of(null); // simula não encontrado
-        return of({
-          id,
-          name: 'Matemática',
-          description: 'Disciplina de matemática',
-          workloadHours: 60
-        });
-      })
+      getAll: jasmine.createSpy('getAll').and.returnValue(
+        of([
+          { id: 1, name: 'Matemática', description: 'Disciplina de matemática', workloadHours: 60 },
+          { id: 2, name: 'Física', description: 'Disciplina de física', workloadHours: 80 }
+        ])
+      )
     };
   });
+
+  const createActivatedRouteMock = (id: string | null): Partial<ActivatedRoute> => {
+    const mockParamMap: ParamMap = {
+      get: (_key: string) => id,
+      getAll: (_key: string) => (id ? [id] : []),
+      has: (_key: string) => id !== null,
+      keys: id ? ['id'] : []
+    };
+
+    return {
+      snapshot: {
+        paramMap: mockParamMap
+      } as any,
+    };
+  };
 
   it('should display subject details when found', async () => {
     await render(DetailsSubjectComponent, {
       providers: [
         { provide: Router, useValue: mockRouter },
         { provide: SubjectService, useValue: mockSubjectService },
-        { provide: ActivatedRoute, useValue: { snapshot: { paramMap: { get: () => '1' } } } }
+        { provide: ActivatedRoute, useValue: createActivatedRouteMock('1') }
       ]
     });
 
@@ -41,29 +56,30 @@ describe('DetailsSubjectComponent', () => {
     expect(screen.getByText('60 horas')).toBeTruthy();
   });
 
-  it('should display "Disciplina não encontrada" if subjectId is invalid', async () => {
+  it('should show "Disciplina não encontrada" if subjectId not in list', async () => {
     spyOn(window, 'alert');
 
     await render(DetailsSubjectComponent, {
       providers: [
         { provide: Router, useValue: mockRouter },
         { provide: SubjectService, useValue: mockSubjectService },
-        { provide: ActivatedRoute, useValue: { snapshot: { paramMap: { get: () => '999' } } } }
+        { provide: ActivatedRoute, useValue: createActivatedRouteMock('999') }
       ]
     });
 
     expect(screen.getByText('Disciplina não encontrada')).toBeTruthy();
     expect(window.alert).toHaveBeenCalledWith('Disciplina não encontrada');
+    expect(mockRouter.navigate).toHaveBeenCalledWith(['/subjects']);
   });
 
-  it('should alert and navigate if id is not valid', async () => {
+  it('should alert and navigate if id is null', async () => {
     spyOn(window, 'alert');
 
     await render(DetailsSubjectComponent, {
       providers: [
         { provide: Router, useValue: mockRouter },
         { provide: SubjectService, useValue: mockSubjectService },
-        { provide: ActivatedRoute, useValue: { snapshot: { paramMap: { get: () => null } } } }
+        { provide: ActivatedRoute, useValue: createActivatedRouteMock(null) }
       ]
     });
 
@@ -72,11 +88,11 @@ describe('DetailsSubjectComponent', () => {
   });
 
   it('should navigate to edit page when edit button is clicked', async () => {
-    const { fixture } = await render(DetailsSubjectComponent, {
+    await render(DetailsSubjectComponent, {
       providers: [
         { provide: Router, useValue: mockRouter },
         { provide: SubjectService, useValue: mockSubjectService },
-        { provide: ActivatedRoute, useValue: { snapshot: { paramMap: { get: () => '2' } } } }
+        { provide: ActivatedRoute, useValue: createActivatedRouteMock('2') }
       ]
     });
 
@@ -87,11 +103,11 @@ describe('DetailsSubjectComponent', () => {
   });
 
   it('should navigate back when back button is clicked (details template)', async () => {
-    const { fixture } = await render(DetailsSubjectComponent, {
+    await render(DetailsSubjectComponent, {
       providers: [
         { provide: Router, useValue: mockRouter },
         { provide: SubjectService, useValue: mockSubjectService },
-        { provide: ActivatedRoute, useValue: { snapshot: { paramMap: { get: () => '1' } } } }
+        { provide: ActivatedRoute, useValue: createActivatedRouteMock('1') }
       ]
     });
 
@@ -102,11 +118,11 @@ describe('DetailsSubjectComponent', () => {
   });
 
   it('should navigate back when back button is clicked (notFound template)', async () => {
-    const { fixture } = await render(DetailsSubjectComponent, {
+    await render(DetailsSubjectComponent, {
       providers: [
         { provide: Router, useValue: mockRouter },
         { provide: SubjectService, useValue: mockSubjectService },
-        { provide: ActivatedRoute, useValue: { snapshot: { paramMap: { get: () => '999' } } } }
+        { provide: ActivatedRoute, useValue: createActivatedRouteMock('999') }
       ]
     });
 

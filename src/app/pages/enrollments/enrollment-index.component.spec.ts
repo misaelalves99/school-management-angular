@@ -11,7 +11,7 @@ import { render, screen, fireEvent } from '@testing-library/angular';
 describe('EnrollmentIndexComponent', () => {
   let component: EnrollmentIndexComponent;
   let fixture: ComponentFixture<EnrollmentIndexComponent>;
-  let routerMock: Partial<Router>;
+  let routerMock: jasmine.SpyObj<Router>;
 
   const mockStudents = [
     { id: 1, name: 'Aluno A' },
@@ -30,7 +30,7 @@ describe('EnrollmentIndexComponent', () => {
   ];
 
   beforeEach(async () => {
-    routerMock = { navigate: jasmine.createSpy('navigate') };
+    routerMock = jasmine.createSpyObj('Router', ['navigate']);
 
     const enrollmentServiceMock = { getAll: jasmine.createSpy('getAll').and.returnValue(of(mockEnrollments)) };
     const studentServiceMock = { getAll: jasmine.createSpy('getAll').and.returnValue(of(mockStudents)) };
@@ -98,6 +98,7 @@ describe('EnrollmentIndexComponent', () => {
       componentProperties: {},
     });
 
+    expect(screen.getByText('ID')).toBeTruthy();
     expect(screen.getByText('Aluno')).toBeTruthy();
     expect(screen.getByText('Turma')).toBeTruthy();
     expect(screen.getByText('Status')).toBeTruthy();
@@ -106,10 +107,23 @@ describe('EnrollmentIndexComponent', () => {
 
   it('should display fallback text for missing student/classroom', () => {
     component.enrollments.push({ id: 4, studentId: 999, classRoomId: 999, status: 'Ativo', enrollmentDate: '2025-08-23' });
+
     const studentName = component.getStudentName(999);
     const classRoomName = component.getClassRoomName(999);
 
     expect(studentName).toBe('Aluno não informado');
     expect(classRoomName).toBe('Turma não informada');
+  });
+
+  it('should update searchString via ngModel', async () => {
+    await render(EnrollmentIndexComponent, {
+      imports: [CommonModule, FormsModule],
+      componentProperties: {},
+    });
+
+    const input = screen.getByPlaceholderText('Buscar Matrícula ou Status...') as HTMLInputElement;
+    fireEvent.input(input, { target: { value: 'Inativo' } });
+
+    expect(component.searchString).toBe('Inativo');
   });
 });

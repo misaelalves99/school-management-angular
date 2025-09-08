@@ -23,19 +23,22 @@ export class DetailsSubjectComponent implements OnInit {
   ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('id');
     const subjectId = idParam ? Number(idParam) : null;
+
     if (!subjectId) {
       alert('ID inválido');
       this.router.navigate(['/subjects']);
       return;
     }
 
-    this.subjectService.getById(subjectId).subscribe(s => {
-      if (!s) {
+    // 🔥 fica escutando mudanças do service
+    this.subjectService.getAll().subscribe(subjects => {
+      const found = subjects.find(s => s.id === subjectId);
+      if (!found) {
         alert('Disciplina não encontrada');
         this.router.navigate(['/subjects']);
         return;
       }
-      this.subject = s;
+      this.subject = found;
     });
   }
 

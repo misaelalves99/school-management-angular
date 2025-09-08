@@ -1,9 +1,10 @@
 // src/pages/subjects/create/create-subject.component.spec.ts
 
 import { render, screen, fireEvent } from '@testing-library/angular';
-import { CreateSubjectComponent } from './create-subject.component';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { of } from 'rxjs';
+import { CreateSubjectComponent } from './create-subject.component';
 import { SubjectService } from '../../../services/subject.service';
 
 describe('CreateSubjectComponent', () => {
@@ -12,10 +13,10 @@ describe('CreateSubjectComponent', () => {
 
   beforeEach(() => {
     mockSubjectService = {
-      add: jasmine.createSpy('add')
+      create: jasmine.createSpy('create').and.returnValue(of({})),
     };
     mockRouter = {
-      navigate: jasmine.createSpy('navigate')
+      navigate: jasmine.createSpy('navigate'),
     };
   });
 
@@ -24,8 +25,8 @@ describe('CreateSubjectComponent', () => {
       imports: [FormsModule],
       providers: [
         { provide: SubjectService, useValue: mockSubjectService },
-        { provide: Router, useValue: mockRouter }
-      ]
+        { provide: Router, useValue: mockRouter },
+      ],
     });
 
     expect(screen.getByText('Cadastrar Nova Disciplina')).toBeTruthy();
@@ -41,8 +42,8 @@ describe('CreateSubjectComponent', () => {
       imports: [FormsModule],
       providers: [
         { provide: SubjectService, useValue: mockSubjectService },
-        { provide: Router, useValue: mockRouter }
-      ]
+        { provide: Router, useValue: mockRouter },
+      ],
     });
 
     const component = fixture.componentInstance;
@@ -61,8 +62,8 @@ describe('CreateSubjectComponent', () => {
       imports: [FormsModule],
       providers: [
         { provide: SubjectService, useValue: mockSubjectService },
-        { provide: Router, useValue: mockRouter }
-      ]
+        { provide: Router, useValue: mockRouter },
+      ],
     });
 
     const component = fixture.componentInstance;
@@ -77,8 +78,8 @@ describe('CreateSubjectComponent', () => {
       imports: [FormsModule],
       providers: [
         { provide: SubjectService, useValue: mockSubjectService },
-        { provide: Router, useValue: mockRouter }
-      ]
+        { provide: Router, useValue: mockRouter },
+      ],
     });
 
     const component = fixture.componentInstance;
@@ -89,13 +90,13 @@ describe('CreateSubjectComponent', () => {
     expect(component.errors.workloadHours).toBe('A carga horária deve ser maior que 0.');
   });
 
-  it('should call service.add and navigate when form is valid', async () => {
+  it('should call subjectService.create and navigate when form is valid', async () => {
     const { fixture } = await render(CreateSubjectComponent, {
       imports: [FormsModule],
       providers: [
         { provide: SubjectService, useValue: mockSubjectService },
-        { provide: Router, useValue: mockRouter }
-      ]
+        { provide: Router, useValue: mockRouter },
+      ],
     });
 
     const component = fixture.componentInstance;
@@ -105,7 +106,7 @@ describe('CreateSubjectComponent', () => {
 
     component.handleSubmit();
 
-    expect(mockSubjectService.add).toHaveBeenCalledWith(component.subject);
+    expect(mockSubjectService.create).toHaveBeenCalledWith(component.subject);
     expect(mockRouter.navigate).toHaveBeenCalledWith(['/subjects']);
   });
 
@@ -114,8 +115,8 @@ describe('CreateSubjectComponent', () => {
       imports: [FormsModule],
       providers: [
         { provide: SubjectService, useValue: mockSubjectService },
-        { provide: Router, useValue: mockRouter }
-      ]
+        { provide: Router, useValue: mockRouter },
+      ],
     });
 
     const component = fixture.componentInstance;
@@ -128,8 +129,8 @@ describe('CreateSubjectComponent', () => {
       imports: [FormsModule],
       providers: [
         { provide: SubjectService, useValue: mockSubjectService },
-        { provide: Router, useValue: mockRouter }
-      ]
+        { provide: Router, useValue: mockRouter },
+      ],
     });
 
     const component = fixture.componentInstance;
@@ -146,8 +147,8 @@ describe('CreateSubjectComponent', () => {
       imports: [FormsModule],
       providers: [
         { provide: SubjectService, useValue: mockSubjectService },
-        { provide: Router, useValue: mockRouter }
-      ]
+        { provide: Router, useValue: mockRouter },
+      ],
     });
 
     const component = fixture.componentInstance;

@@ -24,8 +24,8 @@ describe('CreateTeacherComponent', () => {
 
   const routerMock = { navigate: jasmine.createSpy('navigate') };
 
-  it('should render form fields and load subjects', async () => {
-    await render(CreateTeacherComponent, {
+  const setup = async () =>
+    render(CreateTeacherComponent, {
       imports: [FormsModule],
       providers: [
         { provide: TeacherService, useValue: teacherServiceMock },
@@ -33,6 +33,9 @@ describe('CreateTeacherComponent', () => {
         { provide: Router, useValue: routerMock },
       ],
     });
+
+  it('should render form fields and load subjects', async () => {
+    await setup();
 
     expect(screen.getByLabelText('Nome')).toBeTruthy();
     expect(screen.getByLabelText('Email')).toBeTruthy();
@@ -41,17 +44,12 @@ describe('CreateTeacherComponent', () => {
 
     const options = screen.getAllByRole('option');
     expect(options.length).toBe(3); // "Selecione uma disciplina" + 2 disciplinas
+    expect(options[1].textContent).toBe('Matemática');
+    expect(options[2].textContent).toBe('Física');
   });
 
   it('should validate required fields', async () => {
-    const { fixture } = await render(CreateTeacherComponent, {
-      imports: [FormsModule],
-      providers: [
-        { provide: TeacherService, useValue: teacherServiceMock },
-        { provide: SubjectService, useValue: subjectServiceMock },
-        { provide: Router, useValue: routerMock },
-      ],
-    });
+    const { fixture } = await setup();
 
     const component = fixture.componentInstance;
     component.formData = {
@@ -71,36 +69,26 @@ describe('CreateTeacherComponent', () => {
   });
 
   it('should validate email format', async () => {
-    const { fixture } = await render(CreateTeacherComponent, {
-      imports: [FormsModule],
-      providers: [
-        { provide: TeacherService, useValue: teacherServiceMock },
-        { provide: SubjectService, useValue: subjectServiceMock },
-        { provide: Router, useValue: routerMock },
-      ],
-    });
+    const { fixture } = await setup();
 
     const component = fixture.componentInstance;
-    component.formData.name = 'Teste';
-    component.formData.email = 'invalid-email';
-    component.formData.dateOfBirth = '2000-01-01';
-    component.formData.subject = '1';
+    component.formData = {
+      name: 'Teste',
+      email: 'invalid-email',
+      dateOfBirth: '2000-01-01',
+      subject: '1',
+      phone: '',
+      address: '',
+    };
 
     expect(component.validate()).toBeFalse();
     expect(component.errors.email).toBe('Email inválido.');
   });
 
   it('should call teacherService.create and navigate on valid submit', async () => {
-    const { fixture } = await render(CreateTeacherComponent, {
-      imports: [FormsModule],
-      providers: [
-        { provide: TeacherService, useValue: teacherServiceMock },
-        { provide: SubjectService, useValue: subjectServiceMock },
-        { provide: Router, useValue: routerMock },
-      ],
-    });
-
+    const { fixture } = await setup();
     const component = fixture.componentInstance;
+
     component.formData = {
       name: 'João',
       email: 'joao@email.com',
@@ -129,16 +117,9 @@ describe('CreateTeacherComponent', () => {
   it('should show alert on service error', async () => {
     teacherServiceMock.create.and.returnValue(throwError(() => new Error('Erro teste')));
 
-    const { fixture } = await render(CreateTeacherComponent, {
-      imports: [FormsModule],
-      providers: [
-        { provide: TeacherService, useValue: teacherServiceMock },
-        { provide: SubjectService, useValue: subjectServiceMock },
-        { provide: Router, useValue: routerMock },
-      ],
-    });
-
+    const { fixture } = await setup();
     const component = fixture.componentInstance;
+
     component.formData = {
       name: 'João',
       email: 'joao@email.com',
@@ -155,18 +136,20 @@ describe('CreateTeacherComponent', () => {
   });
 
   it('should navigate back when goBack is called', async () => {
-    const { fixture } = await render(CreateTeacherComponent, {
-      imports: [FormsModule],
-      providers: [
-        { provide: TeacherService, useValue: teacherServiceMock },
-        { provide: SubjectService, useValue: subjectServiceMock },
-        { provide: Router, useValue: routerMock },
-      ],
-    });
-
+    const { fixture } = await setup();
     const component = fixture.componentInstance;
+
     component.goBack();
 
     expect(routerMock.navigate).toHaveBeenCalledWith(['/teachers']);
+  });
+
+  it('should update formData.subject on select change', async () => {
+    const { fixture } = await setup();
+
+    const select = screen.getByLabelText('Disciplina') as HTMLSelectElement;
+    fireEvent.change(select, { target: { value: '2' } });
+
+    expect(fixture.componentInstance.formData.subject).toBe('2');
   });
 });

@@ -1,6 +1,6 @@
 <!-- src/pages/students/details/details-page.component.html -->
 
-<div class="container">
+<div class="container" *ngIf="student; else loading">
   <h1 class="title">Detalhes do Aluno</h1>
 
   <div class="detailsRow">
@@ -38,3 +38,7 @@
     <button class="btnSecondary" (click)="back()">Voltar</button>
   </div>
 </div>
+
+<ng-template #loading>
+  <p>Carregando dados do aluno...</p>
+</ng-template>

@@ -1,21 +1,27 @@
 // src/pages/enrollments/edit/edit-enrollment.component.spec.ts
 
-// src/pages/enrollments/edit/edit-enrollment.component.spec.ts
-
 import { TestBed, ComponentFixture, fakeAsync, tick } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
-import { EditEnrollmentComponent } from './edit-enrollment.component';
 import { CommonModule } from '@angular/common';
+import { Router, ActivatedRoute } from '@angular/router';
 import { render, screen, fireEvent } from '@testing-library/angular';
-import { Enrollment } from '../../../types/enrollment.model';
+import { of } from 'rxjs'; // <-- IMPORTAR of
+import { EditEnrollmentComponent } from './edit-enrollment.component';
+import { EnrollmentService, Enrollment } from '../../../services/enrollment.service';
+import { StudentService } from '../../../services/student.service';
+import { ClassRoomService } from '../../../services/classroom.service';
+import { Student } from '../../../types/student.model';
+import { ClassRoom } from '../../../types/classroom.model';
 
 describe('EditEnrollmentComponent', () => {
   let component: EditEnrollmentComponent;
   let fixture: ComponentFixture<EditEnrollmentComponent>;
-  let routerMock: Partial<Router>;
+  let routerMock: jasmine.SpyObj<Router>;
+  let enrollmentServiceMock: jasmine.SpyObj<EnrollmentService>;
+  let studentServiceMock: jasmine.SpyObj<StudentService>;
+  let classRoomServiceMock: jasmine.SpyObj<ClassRoomService>;
 
-  const enrollment: Enrollment = {
+  const enrollmentData: Enrollment = {
     id: 1,
     studentId: 1,
     classRoomId: 2,
@@ -23,18 +29,43 @@ describe('EditEnrollmentComponent', () => {
     status: 'Ativo',
   };
 
+  const studentsMock: Student[] = [
+    { id: 1, name: 'Aluno A', email: 'a@email.com', dateOfBirth: '2005-01-01', enrollmentNumber: 'EN001', phone: '123', address: 'Rua A, 1' },
+    { id: 2, name: 'Aluno B', email: 'b@email.com', dateOfBirth: '2005-02-01', enrollmentNumber: 'EN002', phone: '456', address: 'Rua B, 2' },
+  ];
+
+  const classRoomsMock: ClassRoom[] = [
+    { id: 1, name: 'Sala A', capacity: 30, schedule: 'Seg 08:00-10:00', subjects: [], teachers: [], classTeacher: undefined },
+    { id: 2, name: 'Sala B', capacity: 25, schedule: 'Ter 10:00-12:00', subjects: [], teachers: [], classTeacher: undefined },
+  ];
+
   beforeEach(async () => {
-    routerMock = { navigate: jasmine.createSpy('navigate') };
+    routerMock = jasmine.createSpyObj('Router', ['navigate']);
+    enrollmentServiceMock = jasmine.createSpyObj('EnrollmentService', ['getById', 'update']);
+    studentServiceMock = jasmine.createSpyObj('StudentService', ['getAll']);
+    classRoomServiceMock = jasmine.createSpyObj('ClassRoomService', ['getAll']);
+
+    enrollmentServiceMock.getById.and.returnValue(of(enrollmentData));
+    enrollmentServiceMock.update.and.returnValue(of(null));
+    studentServiceMock.getAll.and.returnValue(of(studentsMock));
+    classRoomServiceMock.getAll.and.returnValue(of(classRoomsMock));
 
     await TestBed.configureTestingModule({
       imports: [CommonModule, FormsModule, EditEnrollmentComponent],
-      providers: [{ provide: Router, useValue: routerMock }],
+      providers: [
+        { provide: Router, useValue: routerMock },
+        { provide: EnrollmentService, useValue: enrollmentServiceMock },
+        { provide: StudentService, useValue: studentServiceMock },
+        { provide: ClassRoomService, useValue: classRoomServiceMock },
+        {
+          provide: ActivatedRoute,
+          useValue: { snapshot: { paramMap: new Map([['id', '1']]) } },
+        },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(EditEnrollmentComponent);
     component = fixture.componentInstance;
-    component.enrollment = enrollment;
-    component.formData = { ...enrollment };
     fixture.detectChanges();
   });
 
@@ -61,34 +92,43 @@ describe('EditEnrollmentComponent', () => {
     expect(component.errors.status).toBe('Status é obrigatório.');
   });
 
-  it('should call handleSubmit and navigate if form is valid', fakeAsync(() => {
-    component.formData = { ...enrollment };
-    spyOn(component['enrollmentService'], 'update');
+  it('should call update and navigate if form is valid', fakeAsync(() => {
+    component.formData = { ...enrollmentData };
     component.handleSubmit();
     tick();
-    expect(component['enrollmentService'].update).toHaveBeenCalledWith(enrollment);
+
+    expect(enrollmentServiceMock.update).toHaveBeenCalledWith(enrollmentData);
     expect(routerMock.navigate).toHaveBeenCalledWith(['/enrollments']);
   }));
 
-  it('should update inputs via ngModel', async () => {
+  it('should update form inputs via ngModel', async () => {
     await render(EditEnrollmentComponent, {
-      componentProperties: { formData: { ...enrollment } },
+      componentProperties: { formData: { ...enrollmentData } },
       imports: [FormsModule, CommonModule],
     });
 
-    const studentInput = screen.getByLabelText('Aluno') as HTMLSelectElement;
-    const classInput = screen.getByLabelText('Turma') as HTMLSelectElement;
+    const studentSelect = screen.getByLabelText('Aluno') as HTMLSelectElement;
+    const classSelect = screen.getByLabelText('Turma') as HTMLSelectElement;
     const dateInput = screen.getByLabelText('Data da Matrícula') as HTMLInputElement;
-    const statusInput = screen.getByLabelText('Status') as HTMLSelectElement;
+    const statusSelect = screen.getByLabelText('Status') as HTMLSelectElement;
 
-    fireEvent.change(studentInput, { target: { value: '2' } });
-    fireEvent.change(classInput, { target: { value: '1' } });
+    fireEvent.change(studentSelect, { target: { value: '2' } });
+    fireEvent.change(classSelect, { target: { value: '1' } });
     fireEvent.change(dateInput, { target: { value: '2025-08-22' } });
-    fireEvent.change(statusInput, { target: { value: 'Inativo' } });
+    fireEvent.change(statusSelect, { target: { value: 'Inativo' } });
 
-    expect(studentInput.value).toBe('2');
-    expect(classInput.value).toBe('1');
+    expect(studentSelect.value).toBe('2');
+    expect(classSelect.value).toBe('1');
     expect(dateInput.value).toBe('2025-08-22');
-    expect(statusInput.value).toBe('Inativo');
+    expect(statusSelect.value).toBe('Inativo');
   });
+
+  it('should initialize formData with enrollment from service on ngOnInit', fakeAsync(() => {
+    component.ngOnInit();
+    tick();
+
+    expect(component.formData).toEqual(enrollmentData);
+    expect(component.students).toEqual(studentsMock);
+    expect(component.classRooms).toEqual(classRoomsMock);
+  }));
 });

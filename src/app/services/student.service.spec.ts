@@ -70,6 +70,20 @@ describe('StudentService', () => {
     });
   });
 
+  it('should not change other fields when partially updating', (done) => {
+    service.getById(2).subscribe((student) => {
+      if (!student) return;
+      const originalEmail = student.email;
+      service.update(2, { name: 'Maria Atualizada' }).subscribe(() => {
+        service.getById(2).subscribe((s) => {
+          expect(s?.email).toBe(originalEmail);
+          expect(s?.name).toBe('Maria Atualizada');
+          done();
+        });
+      });
+    });
+  });
+
   it('should return null when updating non-existent student', (done) => {
     service.update(999, { name: 'Não Existe' }).subscribe((updated) => {
       expect(updated).toBeNull();

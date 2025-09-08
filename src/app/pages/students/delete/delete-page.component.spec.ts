@@ -9,17 +9,12 @@ import { render, screen, fireEvent } from '@testing-library/angular';
 describe('DeleteStudentComponent', () => {
   let component: DeleteStudentComponent;
   let fixture: ComponentFixture<DeleteStudentComponent>;
-  let routerMock: Partial<Router>;
-  let studentServiceMock: any;
+  let routerMock: jasmine.SpyObj<Router>;
+  let studentServiceMock: jasmine.SpyObj<any>;
 
   beforeEach(async () => {
-    routerMock = {
-      navigate: jasmine.createSpy('navigate'),
-    };
-
-    studentServiceMock = {
-      delete: jasmine.createSpy('delete'),
-    };
+    routerMock = jasmine.createSpyObj('Router', ['navigate']);
+    studentServiceMock = jasmine.createSpyObj('StudentService', ['delete']);
 
     const activatedRouteMock = {
       snapshot: {
@@ -56,7 +51,7 @@ describe('DeleteStudentComponent', () => {
   });
 
   it('should call studentService.delete and navigate on handleDelete', () => {
-    spyOn(window, 'alert'); // para não exibir alert real
+    spyOn(window, 'alert');
 
     component.handleDelete();
 

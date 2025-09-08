@@ -15,10 +15,10 @@ import { render, screen, fireEvent } from '@testing-library/angular';
 describe('CreateEnrollmentComponent', () => {
   let component: CreateEnrollmentComponent;
   let fixture: ComponentFixture<CreateEnrollmentComponent>;
-  let routerMock: Partial<Router>;
-  let enrollmentServiceMock: Partial<EnrollmentService>;
-  let studentServiceMock: Partial<StudentService>;
-  let classRoomServiceMock: Partial<ClassRoomService>;
+  let routerMock: jasmine.SpyObj<Router>;
+  let enrollmentServiceMock: jasmine.SpyObj<EnrollmentService>;
+  let studentServiceMock: jasmine.SpyObj<StudentService>;
+  let classRoomServiceMock: jasmine.SpyObj<ClassRoomService>;
 
   const students: Student[] = [
     { id: 1, name: 'Aluno A', email: 'a@email.com', dateOfBirth: '2005-01-01', enrollmentNumber: 'EN001', phone: '123456789', address: 'Rua A, 123' },
@@ -31,10 +31,13 @@ describe('CreateEnrollmentComponent', () => {
   ];
 
   beforeEach(async () => {
-    routerMock = { navigate: jasmine.createSpy('navigate') };
-    enrollmentServiceMock = { add: jasmine.createSpy('add') };
-    studentServiceMock = { getAll: () => of(students) };
-    classRoomServiceMock = { getAll: () => of(classRooms) };
+    routerMock = jasmine.createSpyObj('Router', ['navigate']);
+    enrollmentServiceMock = jasmine.createSpyObj('EnrollmentService', ['add']);
+    studentServiceMock = jasmine.createSpyObj('StudentService', ['getAll']);
+    classRoomServiceMock = jasmine.createSpyObj('ClassRoomService', ['getAll']);
+
+    studentServiceMock.getAll.and.returnValue(of(students));
+    classRoomServiceMock.getAll.and.returnValue(of(classRooms));
 
     await TestBed.configureTestingModule({
       imports: [FormsModule, CreateEnrollmentComponent],
@@ -55,25 +58,33 @@ describe('CreateEnrollmentComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  it('deve carregar alunos e turmas ao inicializar', () => {
+    expect(studentServiceMock.getAll).toHaveBeenCalled();
+    expect(classRoomServiceMock.getAll).toHaveBeenCalled();
+    expect(component.students.length).toBe(2);
+    expect(component.classRooms.length).toBe(2);
+  });
+
   it('deve validar formulário e setar erros', () => {
-    component.form = { studentId: undefined, classRoomId: undefined, enrollmentDate: '' };
+    component.form = { studentId: undefined, classRoomId: undefined, enrollmentDate: '', status: undefined };
     const valid = component.validate();
     expect(valid).toBeFalse();
     expect(component.errors.studentId).toBe('Aluno é obrigatório.');
     expect(component.errors.classRoomId).toBe('Turma é obrigatória.');
     expect(component.errors.enrollmentDate).toBe('Data da matrícula é obrigatória.');
+    expect(component.errors.status).toBe('Status é obrigatório.');
   });
 
-  it('não deve chamar enrollmentService.add se formulário inválido', fakeAsync(async () => {
+  it('não deve chamar enrollmentService.add se formulário inválido', fakeAsync(() => {
     component.form = { studentId: undefined, classRoomId: undefined, enrollmentDate: '' };
-    await component.handleSubmit();
+    component.handleSubmit();
     tick();
     expect(enrollmentServiceMock.add).not.toHaveBeenCalled();
   }));
 
-  it('deve chamar enrollmentService.add e navegar se formulário válido', fakeAsync(async () => {
+  it('deve chamar enrollmentService.add e navegar se formulário válido', fakeAsync(() => {
     component.form = { studentId: 1, classRoomId: 2, enrollmentDate: '2025-08-21', status: 'Ativo' };
-    await component.handleSubmit();
+    component.handleSubmit();
     tick();
     expect(enrollmentServiceMock.add).toHaveBeenCalledWith(jasmine.objectContaining({
       studentId: 1,
@@ -109,5 +120,15 @@ describe('CreateEnrollmentComponent', () => {
     expect(classRoomSelect.value).toBe('1');
     expect(dateInput.value).toBe('2025-08-22');
     expect(statusSelect.value).toBe('Inativo');
+  });
+
+  it('deve exibir mensagens de erro no template quando inválido', () => {
+    component.form = { studentId: undefined, classRoomId: undefined, enrollmentDate: '', status: undefined };
+    component.handleSubmit();
+    fixture.detectChanges();
+
+    const errors = fixture.nativeElement.querySelectorAll('.formError');
+    expect(errors.length).toBeGreaterThan(0);
+    expect(errors[0].textContent).toContain('Aluno é obrigatório.');
   });
 });

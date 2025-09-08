@@ -8,12 +8,6 @@
   <div *ngIf="!loading">
     <h3 class="warning">Tem certeza que deseja excluir este professor?</h3>
 
-    <div class="infoBox" *ngIf="teacher">
-      <h4>{{ teacher.name }}</h4>
-      <p>E-mail: {{ teacher.email }}</p>
-      <p>Telefone: {{ teacher.phone }}</p>
-    </div>
-
     <div class="form">
       <button
         class="btn btnDanger"

@@ -18,7 +18,7 @@ describe('ClassRoomService', () => {
 
   it('should return initial classrooms', (done) => {
     service.getAll().pipe(take(1)).subscribe((classrooms) => {
-      expect(classrooms.length).toBe(3); // mock inicial possui 3 salas
+      expect(classrooms.length).toBe(3);
       expect(classrooms[0].name).toBe('Sala A1');
       done();
     });
@@ -71,11 +71,19 @@ describe('ClassRoomService', () => {
   });
 
   it('should not update non-existent classroom', (done) => {
-    const fake = { id: 999, name: 'Sala X', capacity: 0, schedule: '', teachers: [], subjects: [], classTeacher: { id: 0, name: '', email: '', dateOfBirth: '', subject: '', phone: '', address: '' } };
+    const fake = {
+      id: 999,
+      name: 'Sala X',
+      capacity: 0,
+      schedule: '',
+      teachers: [],
+      subjects: [],
+      classTeacher: { id: 0, name: '', email: '', dateOfBirth: '', subject: '', phone: '', address: '' }
+    };
     service.update(fake);
 
     service.getAll().pipe(take(1)).subscribe((classrooms) => {
-      expect(classrooms.length).toBe(3); // mantém as salas iniciais
+      expect(classrooms.length).toBe(3);
       done();
     });
   });
@@ -94,7 +102,7 @@ describe('ClassRoomService', () => {
     service.delete(999);
 
     service.getAll().pipe(take(1)).subscribe((classrooms) => {
-      expect(classrooms.length).toBe(3); // ainda existem 3 salas
+      expect(classrooms.length).toBe(3);
       done();
     });
   });
@@ -119,5 +127,30 @@ describe('ClassRoomService', () => {
     const snapshot = service.snapshot();
     expect(snapshot.length).toBe(3);
     expect(snapshot[0].name).toBe('Sala A1');
+  });
+
+  // Novos testes para integração dos mocks
+  it('should maintain teachers and subjects when adding classroom', (done) => {
+    const newClassroom: ClassRoomFormData = {
+      name: 'Sala D1',
+      capacity: 15,
+      schedule: '17:00 - 19:00',
+      classTeacher: service.snapshot()[0].classTeacher,
+      teachers: service.snapshot()[0].teachers,
+      subjects: service.snapshot()[0].subjects,
+    };
+
+    service.add(newClassroom);
+
+    service.getAll().pipe(take(1)).subscribe((classrooms) => {
+      const added = classrooms.find(c => c.name === 'Sala D1');
+      expect(added).toBeTruthy();
+
+      // Acesso seguro com non-null assertion
+      expect(added!.teachers!.length).toBeGreaterThan(0);
+      expect(added!.subjects!.length).toBeGreaterThan(0);
+
+      done();
+    });
   });
 });

@@ -42,7 +42,10 @@ export class CreateSubjectComponent {
   handleSubmit() {
     if (!this.validate()) return;
 
-    this.subjectService.add(this.subject); // Salva via serviço
+    this.subjectService.create(this.subject).subscribe(() => {
+      this.router.navigate(['/subjects']);
+    });
+
     this.router.navigate(['/subjects']);
   }
 

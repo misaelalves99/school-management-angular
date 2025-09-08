@@ -87,7 +87,7 @@ describe('EnrollmentService', () => {
   it('should do nothing when deleting non-existent id', (done) => {
     service.delete(999).subscribe(() => {
       service.getAll().pipe(take(1)).subscribe((all) => {
-        expect(all.length).toBe(3); // mantem as 3 matrículas iniciais
+        expect(all.length).toBe(3); // mantém as 3 matrículas iniciais
         done();
       });
     });
@@ -98,4 +98,64 @@ describe('EnrollmentService', () => {
     expect(snapshot.length).toBe(3);
     expect(snapshot[0].id).toBe(1);
   });
+
+  // ==========================
+  // Testes extras de borda
+  // ==========================
+
+  it('should add enrollment with studentId and classRoomId > 0', (done) => {
+    const invalidForm: EnrollmentForm = { studentId: 0, classRoomId: -1, enrollmentDate: '2025-05-01' };
+    service.add(invalidForm).subscribe((enrollment) => {
+      expect(enrollment.studentId).toBe(0);
+      expect(enrollment.classRoomId).toBe(-1);
+      done();
+    });
+  });
+
+  it('should not change other fields when updating status only', (done) => {
+    service.getById(2).subscribe((enrollment) => {
+      if (!enrollment) return;
+      const originalDate = enrollment.enrollmentDate;
+      const updated: Enrollment = { ...enrollment, status: 'Ativo' as 'Ativo' };
+      service.update(updated).subscribe(() => {
+        service.getById(2).subscribe((e) => {
+          expect(e?.enrollmentDate).toBe(originalDate);
+          done();
+        });
+      });
+    });
+  });
+
+  it('should allow deleting all enrollments', (done) => {
+    const allIds = service.snapshot().map(e => e.id);
+    allIds.forEach(id => service.delete(id).subscribe());
+    service.getAll().pipe(take(1)).subscribe((all) => {
+      expect(all.length).toBe(0);
+      done();
+    });
+  });
+
+  it('should propagate changes to multiple subscriptions', (done) => {
+    let firstCall = false;
+    let secondCall = false;
+
+    service.getAll().subscribe((all) => {
+      if (!firstCall) {
+        firstCall = true;
+        expect(all.length).toBe(3);
+      } else {
+        expect(all.length).toBe(4);
+        secondCall = true;
+      }
+    });
+
+    const newForm: EnrollmentForm = { studentId: 4, classRoomId: 1, enrollmentDate: '2025-06-01' };
+    service.add(newForm).subscribe(() => {
+      setTimeout(() => {
+        expect(secondCall).toBeTrue();
+        done();
+      }, 0);
+    });
+  });
+
 });

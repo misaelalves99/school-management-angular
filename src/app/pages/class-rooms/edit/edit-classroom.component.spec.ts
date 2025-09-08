@@ -2,13 +2,12 @@
 
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { EditClassroomComponent } from './edit-classroom.component';
-import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { ClassRoomService } from '../../../services/classroom.service';
 import { ClassRoom } from '../../../types/classroom.model';
-import { CommonModule } from '@angular/common';
+import { By } from '@angular/platform-browser';
 
 describe('EditClassroomComponent', () => {
   let component: EditClassroomComponent;
@@ -31,8 +30,7 @@ describe('EditClassroomComponent', () => {
     const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
 
     await TestBed.configureTestingModule({
-      imports: [FormsModule, CommonModule],
-      declarations: [EditClassroomComponent],
+      imports: [EditClassroomComponent], // standalone
       providers: [
         { provide: ClassRoomService, useValue: classRoomServiceSpy },
         { provide: Router, useValue: routerSpy },
@@ -71,7 +69,6 @@ describe('EditClassroomComponent', () => {
 
   it('ngOnInit deve alertar e navegar se sala não encontrada', fakeAsync(() => {
     spyOn(window, 'alert');
-    // Corrigido: usar undefined em vez de null
     classRoomService.getById.and.returnValue(of(undefined));
 
     component.ngOnInit();
@@ -121,4 +118,52 @@ describe('EditClassroomComponent', () => {
     component.cancel();
     expect(router.navigate).toHaveBeenCalledWith(['/classrooms']);
   });
+
+  //
+  // ---- Testes de Template ----
+  //
+  it('deve renderizar o formulário preenchido com os dados da sala', fakeAsync(() => {
+    classRoomService.getById.and.returnValue(of(mockClassRoom));
+    component.ngOnInit();
+    tick();
+    fixture.detectChanges();
+
+    const nameInput = fixture.debugElement.query(By.css('input#name')).nativeElement as HTMLInputElement;
+    const capacityInput = fixture.debugElement.query(By.css('input#capacity')).nativeElement as HTMLInputElement;
+    const scheduleInput = fixture.debugElement.query(By.css('input#schedule')).nativeElement as HTMLInputElement;
+
+    expect(nameInput.value).toBe('Sala A');
+    expect(capacityInput.value).toBe('30');
+    expect(scheduleInput.value).toBe('Seg 08:00-10:00');
+  }));
+
+  it('deve chamar handleSubmit ao enviar o formulário', fakeAsync(() => {
+    classRoomService.getById.and.returnValue(of(mockClassRoom));
+    component.ngOnInit();
+    tick();
+    fixture.detectChanges();
+
+    spyOn(component, 'handleSubmit');
+
+    const form = fixture.debugElement.query(By.css('form')).nativeElement as HTMLFormElement;
+    form.dispatchEvent(new Event('submit'));
+    fixture.detectChanges();
+
+    expect(component.handleSubmit).toHaveBeenCalled();
+  }));
+
+  it('deve chamar cancel ao clicar no botão Voltar', fakeAsync(() => {
+    classRoomService.getById.and.returnValue(of(mockClassRoom));
+    component.ngOnInit();
+    tick();
+    fixture.detectChanges();
+
+    spyOn(component, 'cancel');
+
+    const backBtn = fixture.debugElement.query(By.css('.btnSecondary')).nativeElement as HTMLButtonElement;
+    backBtn.click();
+    fixture.detectChanges();
+
+    expect(component.cancel).toHaveBeenCalled();
+  }));
 });

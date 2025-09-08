@@ -33,21 +33,22 @@ describe('DetailsTeacherComponent', () => {
     spyOn(window, 'alert');
   });
 
-  it('should fetch teacher on init and format date', async () => {
-    const { fixture } = await render(DetailsTeacherComponent, {
+  const setup = () =>
+    render(DetailsTeacherComponent, {
       providers: [
         { provide: TeacherService, useValue: teacherServiceMock },
         { provide: Router, useValue: routerMock },
-        { provide: ActivatedRoute, useValue: routeMock }
-      ]
+        { provide: ActivatedRoute, useValue: routeMock },
+      ],
     });
 
+  it('should fetch teacher on init and format date', async () => {
+    const { fixture } = await setup();
     const component = fixture.componentInstance;
 
     expect(teacherServiceMock.getById).toHaveBeenCalledWith(1);
     expect(component.teacher).toEqual(teacherMock);
 
-    // Verifica data formatada
     const expectedDate = new Date(teacherMock.dateOfBirth).toLocaleDateString();
     expect(component.formattedDate).toBe(expectedDate);
   });
@@ -58,8 +59,8 @@ describe('DetailsTeacherComponent', () => {
       providers: [
         { provide: TeacherService, useValue: teacherServiceMock },
         { provide: Router, useValue: routerMock },
-        { provide: ActivatedRoute, useValue: badRoute }
-      ]
+        { provide: ActivatedRoute, useValue: badRoute },
+      ],
     });
 
     expect(window.alert).toHaveBeenCalledWith('ID inválido');
@@ -72,8 +73,8 @@ describe('DetailsTeacherComponent', () => {
       providers: [
         { provide: TeacherService, useValue: service },
         { provide: Router, useValue: routerMock },
-        { provide: ActivatedRoute, useValue: routeMock }
-      ]
+        { provide: ActivatedRoute, useValue: routeMock },
+      ],
     });
 
     expect(window.alert).toHaveBeenCalledWith('Professor não encontrado.');
@@ -86,8 +87,8 @@ describe('DetailsTeacherComponent', () => {
       providers: [
         { provide: TeacherService, useValue: service },
         { provide: Router, useValue: routerMock },
-        { provide: ActivatedRoute, useValue: routeMock }
-      ]
+        { provide: ActivatedRoute, useValue: routeMock },
+      ],
     });
 
     expect(window.alert).toHaveBeenCalledWith('Erro ao carregar professor.');
@@ -95,14 +96,7 @@ describe('DetailsTeacherComponent', () => {
   });
 
   it('should navigate to edit teacher', async () => {
-    const { fixture } = await render(DetailsTeacherComponent, {
-      providers: [
-        { provide: TeacherService, useValue: teacherServiceMock },
-        { provide: Router, useValue: routerMock },
-        { provide: ActivatedRoute, useValue: routeMock }
-      ]
-    });
-
+    const { fixture } = await setup();
     const component = fixture.componentInstance;
     component.teacher = teacherMock;
 
@@ -111,16 +105,21 @@ describe('DetailsTeacherComponent', () => {
   });
 
   it('should navigate back', async () => {
-    const { fixture } = await render(DetailsTeacherComponent, {
-      providers: [
-        { provide: TeacherService, useValue: teacherServiceMock },
-        { provide: Router, useValue: routerMock },
-        { provide: ActivatedRoute, useValue: routeMock }
-      ]
-    });
-
+    const { fixture } = await setup();
     const component = fixture.componentInstance;
+
     component.goBack();
     expect(routerMock.navigate).toHaveBeenCalledWith(['/teachers']);
+  });
+
+  it('should display teacher details in template', async () => {
+    await setup();
+    expect(screen.getByText('Detalhes do Professor')).toBeTruthy();
+    expect(screen.getByText('Nome:')).toBeTruthy();
+    expect(screen.getByText('Email:')).toBeTruthy();
+    expect(screen.getByText('Data de Nascimento:')).toBeTruthy();
+    expect(screen.getByText('Disciplina:')).toBeTruthy();
+    expect(screen.getByText('Telefone:')).toBeTruthy();
+    expect(screen.getByText('Endereço:')).toBeTruthy();
   });
 });

@@ -13,10 +13,7 @@ describe('DeleteSubjectComponent', () => {
   let mockActivatedRoute: Partial<ActivatedRoute>;
 
   beforeEach(() => {
-    // Mock do Router
     mockRouter = { navigate: jasmine.createSpy('navigate') };
-
-    // Mock do SubjectService
     mockSubjectService = {
       getById: jasmine.createSpy('getById').and.returnValue(
         of({
@@ -29,7 +26,6 @@ describe('DeleteSubjectComponent', () => {
       delete: jasmine.createSpy('delete'),
     };
 
-    // Mock seguro do ActivatedRoute
     const mockParamMap: ParamMap = {
       get: (key: string) => (key === 'id' ? '1' : null),
       has: (key: string) => key === 'id',

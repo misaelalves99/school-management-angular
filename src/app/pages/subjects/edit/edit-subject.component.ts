@@ -1,24 +1,11 @@
 // src/pages/subjects/edit/edit-subject.component.ts
 
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-
-interface Subject {
-  id: number;
-  name: string;
-  description: string;
-  workloadHours: number; // novo campo
-}
-
-// Mock de disciplina
-const mockSubject: Subject = {
-  id: 1,
-  name: 'Matemática',
-  description: 'Disciplina de matemática básica',
-  workloadHours: 60, // valor inicial
-};
+import { Subject } from '../../../types/subject.model';
+import { SubjectService } from '../../../services/subject.service';
 
 @Component({
   selector: 'app-edit-subject',
@@ -27,38 +14,56 @@ const mockSubject: Subject = {
   templateUrl: './edit-subject.component.html',
   styleUrls: ['./edit-subject.component.css'],
 })
-export class EditSubjectComponent {
+export class EditSubjectComponent implements OnInit {
   subject: Subject = { id: 0, name: '', description: '', workloadHours: 1 };
   errors: { name?: string; workloadHours?: string } = {};
 
-  constructor(private route: ActivatedRoute, private router: Router) {
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private subjectService: SubjectService
+  ) {}
+
+  ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('id');
-    // Simula fetch de disciplina pelo id
-    this.subject = mockSubject;
+    const subjectId = idParam ? Number(idParam) : null;
+
+    if (!subjectId) {
+      alert('ID inválido');
+      this.router.navigate(['/subjects']);
+      return;
+    }
+
+    this.subjectService.getById(subjectId).subscribe(s => {
+      if (!s) {
+        alert('Disciplina não encontrada');
+        this.router.navigate(['/subjects']);
+        return;
+      }
+      this.subject = { ...s };
+    });
   }
 
   validate(): boolean {
-    const newErrors: { name?: string; workloadHours?: string } = {};
-
+    this.errors = {};
     if (!this.subject.name.trim()) {
-      newErrors.name = 'O nome da disciplina é obrigatório.';
+      this.errors.name = 'O nome da disciplina é obrigatório.';
     }
-
     if (!this.subject.workloadHours || this.subject.workloadHours <= 0) {
-      newErrors.workloadHours = 'A carga horária deve ser maior que zero.';
+      this.errors.workloadHours = 'A carga horária deve ser maior que zero.';
     }
-
-    this.errors = newErrors;
-    return Object.keys(newErrors).length === 0;
+    return Object.keys(this.errors).length === 0;
   }
 
-  handleSubmit() {
+  handleSubmit(): void {
     if (!this.validate()) return;
-    console.log('Salvar alterações:', this.subject);
-    this.router.navigate(['/subjects']);
+
+    this.subjectService.update(this.subject.id, this.subject).subscribe(() => {
+      this.router.navigate(['/subjects']);
+    });
   }
 
-  back() {
+  back(): void {
     this.router.navigate(['/subjects']);
   }
 }

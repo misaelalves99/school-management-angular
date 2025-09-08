@@ -2,11 +2,9 @@
 
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { DeleteClassroomComponent } from './delete-classroom.component';
-import { Router } from '@angular/router';
-import { ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { ClassRoomService } from '../../../services/classroom.service';
-import { CommonModule } from '@angular/common';
 import { ClassRoom } from '../../../types/classroom.model';
 
 describe('DeleteClassroomComponent', () => {
@@ -51,12 +49,14 @@ describe('DeleteClassroomComponent', () => {
     const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
 
     await TestBed.configureTestingModule({
-      imports: [CommonModule],
-      declarations: [DeleteClassroomComponent],
+      imports: [DeleteClassroomComponent], // ✅ standalone component
       providers: [
         { provide: ClassRoomService, useValue: classRoomServiceSpy },
         { provide: Router, useValue: routerSpy },
-        { provide: ActivatedRoute, useValue: { snapshot: { paramMap: { get: () => '1' } } } }
+        {
+          provide: ActivatedRoute,
+          useValue: { snapshot: { paramMap: { get: () => '1' } } }
+        }
       ]
     }).compileComponents();
 
@@ -79,8 +79,9 @@ describe('DeleteClassroomComponent', () => {
 
   it('ngOnInit deve alertar e navegar se id inválido', () => {
     spyOn(window, 'alert');
-    const routeSpy = TestBed.inject(ActivatedRoute);
-    (routeSpy.snapshot.paramMap.get as jasmine.Spy).and.returnValue(null);
+    const route = TestBed.inject(ActivatedRoute);
+    // força ID inválido
+    (route.snapshot.paramMap.get as any) = () => null;
 
     component.ngOnInit();
 
@@ -90,7 +91,6 @@ describe('DeleteClassroomComponent', () => {
 
   it('ngOnInit deve alertar e navegar se sala não encontrada', fakeAsync(() => {
     spyOn(window, 'alert');
-    // Corrigido: usar undefined em vez de null
     classRoomService.getById.and.returnValue(of(undefined));
 
     component.ngOnInit();
@@ -111,7 +111,7 @@ describe('DeleteClassroomComponent', () => {
     expect(router.navigate).toHaveBeenCalledWith(['/classrooms']);
   }));
 
-  it('getSubjectNames deve retornar nomes separados por vírgula', () => {
+  it('getSubjectNames deve retornar nomes separados por vírgula ou "Nenhuma"', () => {
     expect(component.getSubjectNames(mockClassRoom.subjects)).toBe('Matemática, Física');
     expect(component.getSubjectNames([])).toBe('Nenhuma');
   });
@@ -150,4 +150,24 @@ describe('DeleteClassroomComponent', () => {
     component.cancel();
     expect(router.navigate).toHaveBeenCalledWith(['/classrooms']);
   });
+
+  // ✅ Testes do template
+  it('deve mostrar "Carregando..." quando classRoom é null', () => {
+    component.classRoom = null;
+    fixture.detectChanges();
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.textContent).toContain('Carregando...');
+  });
+
+  it('deve mostrar título e botões quando classRoom é definido', fakeAsync(() => {
+    classRoomService.getById.and.returnValue(of(mockClassRoom));
+    component.ngOnInit();
+    tick();
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('h1')?.textContent).toContain('Excluir Sala');
+    expect(compiled.querySelector('button.btnDanger')).toBeTruthy();
+    expect(compiled.querySelector('button.btnSecondary')).toBeTruthy();
+  }));
 });

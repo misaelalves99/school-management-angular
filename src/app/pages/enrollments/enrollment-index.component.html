@@ -18,6 +18,7 @@
     <table class="table">
       <thead>
         <tr>
+          <th>ID</th> <!-- Adicionado -->
           <th>Aluno</th>
           <th>Turma</th>
           <th>Status</th>
@@ -27,9 +28,10 @@
       </thead>
       <tbody>
         <tr *ngIf="filteredEnrollments.length === 0">
-          <td colspan="5" style="text-align:center; padding:20px;">Nenhuma matrícula encontrada.</td>
+          <td colspan="6" style="text-align:center; padding:20px;">Nenhuma matrícula encontrada.</td>
         </tr>
         <tr *ngFor="let enrollment of filteredEnrollments">
+          <td>{{ enrollment.id }}</td> <!-- Adicionado -->
           <td>{{ getStudentName(enrollment.studentId) }}</td>
           <td>{{ getClassRoomName(enrollment.classRoomId) }}</td>
           <td>{{ enrollment.status }}</td>

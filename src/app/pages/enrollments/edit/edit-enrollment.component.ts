@@ -1,12 +1,10 @@
 // src/pages/enrollments/edit/edit-enrollment.component.ts
 
-// src/pages/enrollments/edit/edit-enrollment.component.ts
-
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { EnrollmentService, Enrollment } from '../../../services/enrollment.service';
+import { EnrollmentService, Enrollment, EnrollmentForm } from '../../../services/enrollment.service';
 import { StudentService } from '../../../services/student.service';
 import { ClassRoomService } from '../../../services/classroom.service';
 import { Student } from '../../../types/student.model';
@@ -36,7 +34,15 @@ export class EditEnrollmentComponent implements OnInit {
   enrollment!: Enrollment;
   students: Student[] = [];
   classRooms: ClassRoom[] = [];
-  formData!: Enrollment;
+  
+  formData: EnrollmentForm & { id: number; status: 'Ativo' | 'Inativo' } = {
+    id: 0,
+    studentId: 0,
+    classRoomId: 0,
+    enrollmentDate: '',
+    status: 'Ativo'
+  };
+
   errors: ValidationErrors = {};
 
   ngOnInit(): void {
@@ -56,7 +62,7 @@ export class EditEnrollmentComponent implements OnInit {
         return;
       }
       this.enrollment = e;
-      this.formData = { ...e };
+      this.formData = { ...e }; // Inicializa o formData corretamente
     });
 
     this.studentService.getAll().subscribe(students => this.students = students);
@@ -65,12 +71,10 @@ export class EditEnrollmentComponent implements OnInit {
 
   validate(): boolean {
     const newErrors: ValidationErrors = {};
-
     if (!this.formData.studentId) newErrors.studentId = 'Aluno é obrigatório.';
     if (!this.formData.classRoomId) newErrors.classRoomId = 'Turma é obrigatória.';
     if (!this.formData.enrollmentDate) newErrors.enrollmentDate = 'Data é obrigatória.';
     if (!this.formData.status) newErrors.status = 'Status é obrigatório.';
-
     this.errors = newErrors;
     return Object.keys(newErrors).length === 0;
   }
@@ -78,8 +82,9 @@ export class EditEnrollmentComponent implements OnInit {
   handleSubmit(): void {
     if (!this.validate()) return;
 
-    this.enrollmentService.update(this.formData);
-    this.router.navigate(['/enrollments']);
+    this.enrollmentService.update(this.formData as Enrollment).subscribe(() => {
+      this.router.navigate(['/enrollments']);
+    });
   }
 
   back(): void {

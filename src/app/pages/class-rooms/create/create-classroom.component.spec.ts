@@ -1,31 +1,33 @@
 // src/pages/class-rooms/create/create-classroom.component.spec.ts
 
-import { TestBed, ComponentFixture } from '@angular/core/testing';
-import { CreateClassroomComponent } from './create-classroom.component';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { CreateClassroomComponent } from './create-classroom.component';
 import { ClassRoomService } from '../../../services/classroom.service';
-import { RouterTestingModule } from '@angular/router/testing';
+import { By } from '@angular/platform-browser';
+import { DebugElement } from '@angular/core';
 
 describe('CreateClassroomComponent', () => {
   let component: CreateClassroomComponent;
   let fixture: ComponentFixture<CreateClassroomComponent>;
-  let classRoomService: jasmine.SpyObj<ClassRoomService>;
-  let router: Router;
+  let classRoomServiceSpy: jasmine.SpyObj<ClassRoomService>;
+  let routerSpy: jasmine.SpyObj<Router>;
 
   beforeEach(async () => {
-    const classRoomServiceSpy = jasmine.createSpyObj('ClassRoomService', ['add']);
+    classRoomServiceSpy = jasmine.createSpyObj('ClassRoomService', ['add']);
+    routerSpy = jasmine.createSpyObj('Router', ['navigate']);
 
     await TestBed.configureTestingModule({
-      imports: [FormsModule, RouterTestingModule],
-      declarations: [CreateClassroomComponent],
-      providers: [{ provide: ClassRoomService, useValue: classRoomServiceSpy }],
+      imports: [FormsModule, CreateClassroomComponent],
+      providers: [
+        { provide: ClassRoomService, useValue: classRoomServiceSpy },
+        { provide: Router, useValue: routerSpy },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(CreateClassroomComponent);
     component = fixture.componentInstance;
-    classRoomService = TestBed.inject(ClassRoomService) as jasmine.SpyObj<ClassRoomService>;
-    router = TestBed.inject(Router);
     fixture.detectChanges();
   });
 
@@ -33,39 +35,70 @@ describe('CreateClassroomComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('não deve chamar service se campos obrigatórios estiverem vazios', () => {
+  it('deve renderizar inputs e botões', () => {
+    const nameInput: DebugElement = fixture.debugElement.query(By.css('#name'));
+    const capacityInput: DebugElement = fixture.debugElement.query(By.css('#capacity'));
+    const scheduleInput: DebugElement = fixture.debugElement.query(By.css('#schedule'));
+    const submitBtn: DebugElement = fixture.debugElement.query(By.css('button[type="submit"]'));
+    const cancelBtn: DebugElement = fixture.debugElement.query(By.css('button.btnSecondary'));
+
+    expect(nameInput).toBeTruthy();
+    expect(capacityInput).toBeTruthy();
+    expect(scheduleInput).toBeTruthy();
+    expect(submitBtn).toBeTruthy();
+    expect(cancelBtn).toBeTruthy();
+  });
+
+  it('deve atualizar propriedades do componente via ngModel', () => {
+    const nameInput: HTMLInputElement = fixture.debugElement.query(By.css('#name')).nativeElement;
+    const capacityInput: HTMLInputElement = fixture.debugElement.query(By.css('#capacity')).nativeElement;
+    const scheduleInput: HTMLInputElement = fixture.debugElement.query(By.css('#schedule')).nativeElement;
+
+    nameInput.value = 'Sala X';
+    nameInput.dispatchEvent(new Event('input'));
+
+    capacityInput.value = '25';
+    capacityInput.dispatchEvent(new Event('input'));
+
+    scheduleInput.value = 'Seg 08:00';
+    scheduleInput.dispatchEvent(new Event('input'));
+
+    fixture.detectChanges();
+
+    expect(component.name).toBe('Sala X');
+    expect(component.capacity).toBe(25);
+    expect(component.schedule).toBe('Seg 08:00');
+  });
+
+  it('não deve chamar service se algum campo estiver vazio', () => {
     component.name = '';
     component.capacity = null;
     component.schedule = '';
     component.handleSubmit();
-    expect(classRoomService.add).not.toHaveBeenCalled();
+    expect(classRoomServiceSpy.add).not.toHaveBeenCalled();
+    expect(routerSpy.navigate).not.toHaveBeenCalled();
   });
 
-  it('deve chamar service com objeto completo e navegar ao submeter formulário válido', () => {
-    spyOn(router, 'navigate');
-
-    component.name = 'Sala A';
+  it('deve chamar service e navegar ao submeter formulário válido', () => {
+    component.name = 'Sala Y';
     component.capacity = 30;
-    component.schedule = 'Seg 08:00-10:00';
+    component.schedule = 'Ter 10:00';
 
     component.handleSubmit();
 
-    expect(classRoomService.add).toHaveBeenCalledWith(jasmine.objectContaining({
-      id: 0,
-      name: 'Sala A',
+    expect(classRoomServiceSpy.add).toHaveBeenCalledWith({
+      name: 'Sala Y',
       capacity: 30,
-      schedule: 'Seg 08:00-10:00',
+      schedule: 'Ter 10:00',
       subjects: [],
+      teachers: [],
       classTeacher: undefined,
-      teachers: []
-    }));
-
-    expect(router.navigate).toHaveBeenCalledWith(['/classrooms']);
+    });
+    expect(routerSpy.navigate).toHaveBeenCalledWith(['/classrooms']);
   });
 
-  it('deve navegar ao cancelar', () => {
-    spyOn(router, 'navigate');
+  it('deve navegar ao clicar no botão cancelar', () => {
     component.cancel();
-    expect(router.navigate).toHaveBeenCalledWith(['/classrooms']);
+    expect(routerSpy.navigate).toHaveBeenCalledWith(['/classrooms']);
   });
 });

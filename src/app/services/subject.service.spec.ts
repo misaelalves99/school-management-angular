@@ -1,7 +1,7 @@
 // src/services/subject.service.spec.ts
 
 import { TestBed } from '@angular/core/testing';
-import { SubjectService } from './subject.service';
+import { SubjectService, SubjectFormData } from './subject.service';
 import { Subject } from '../types/subject.model';
 import { take } from 'rxjs/operators';
 
@@ -19,7 +19,7 @@ describe('SubjectService', () => {
 
   it('should return initial subjects', (done) => {
     service.getAll().pipe(take(1)).subscribe(subjects => {
-      expect(subjects.length).toBe(4); // Pelo mock inicial do service
+      expect(subjects.length).toBe(4);
       expect(subjects[0].name).toBe('Matemática');
       done();
     });
@@ -39,54 +39,62 @@ describe('SubjectService', () => {
     });
   });
 
-  it('should add a new subject', (done) => {
-    const newSubject: Subject = { id: 5, name: 'Geografia', description: 'Geografia básica', workloadHours: 50 };
-    service.add(newSubject);
+  it('should create a new subject', (done) => {
+    const newSubjectData: SubjectFormData = {
+      name: 'Geografia',
+      description: 'Geografia básica',
+      workloadHours: 50
+    };
+    service.create(newSubjectData).subscribe((newSubject) => {
+      expect(newSubject.id).toBeGreaterThan(0);
+      expect(newSubject.name).toBe('Geografia');
 
-    service.getAll().pipe(take(1)).subscribe(subjects => {
-      expect(subjects.length).toBe(5);
-      expect(subjects.find(s => s.id === 5)).toEqual(newSubject);
-      done();
+      service.getAll().pipe(take(1)).subscribe(subjects => {
+        expect(subjects.length).toBe(5);
+        expect(subjects.find(s => s.id === newSubject.id)).toBeTruthy();
+        done();
+      });
     });
   });
 
   it('should update existing subject', (done) => {
-    const updated: Subject = { ...service.snapshot()[0], name: 'Matemática Avançada' };
-    service.update(updated);
+    const existing = service.snapshot()[0];
+    const updatedData: Partial<Subject> = { name: 'Matemática Avançada' };
 
-    service.getById(updated.id).subscribe(subject => {
-      expect(subject?.name).toBe('Matemática Avançada');
-      done();
+    service.update(existing.id, updatedData).subscribe((updated) => {
+      expect(updated?.name).toBe('Matemática Avançada');
+
+      service.getById(existing.id).subscribe((s) => {
+        expect(s?.name).toBe('Matemática Avançada');
+        done();
+      });
     });
   });
 
-  it('should not update non-existent subject', (done) => {
-    const updated: Subject = { id: 999, name: 'Não Existe', description: 'Nada', workloadHours: 0 };
-    service.update(updated);
-
-    service.getAll().pipe(take(1)).subscribe(subjects => {
-      expect(subjects.length).toBe(4); // mock inicial permanece
+  it('should return null when updating non-existent subject', (done) => {
+    service.update(999, { name: 'Não Existe' }).subscribe((updated) => {
+      expect(updated).toBeNull();
       done();
     });
   });
 
   it('should delete subject by id', (done) => {
     const idToDelete = service.snapshot()[0].id;
-    service.delete(idToDelete);
-
-    service.getAll().pipe(take(1)).subscribe(subjects => {
-      expect(subjects.find(s => s.id === idToDelete)).toBeUndefined();
-      expect(subjects.length).toBe(3);
-      done();
+    service.delete(idToDelete).subscribe(() => {
+      service.getAll().pipe(take(1)).subscribe(subjects => {
+        expect(subjects.find(s => s.id === idToDelete)).toBeUndefined();
+        expect(subjects.length).toBe(3);
+        done();
+      });
     });
   });
 
   it('should do nothing when deleting non-existent id', (done) => {
-    service.delete(999);
-
-    service.getAll().pipe(take(1)).subscribe(subjects => {
-      expect(subjects.length).toBe(4);
-      done();
+    service.delete(999).subscribe(() => {
+      service.getAll().pipe(take(1)).subscribe(subjects => {
+        expect(subjects.length).toBe(4);
+        done();
+      });
     });
   });
 

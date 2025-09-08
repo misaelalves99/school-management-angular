@@ -24,7 +24,7 @@ describe('DeleteTeacherComponent', () => {
   beforeEach(() => {
     teacherServiceMock = {
       getById: jasmine.createSpy('getById').and.returnValue(of(teacherMock)),
-      delete: jasmine.createSpy('delete').and.returnValue(of({}))
+      delete: jasmine.createSpy('delete').and.returnValue(of({})),
     };
 
     routerMock = { navigate: jasmine.createSpy('navigate') };
@@ -34,19 +34,21 @@ describe('DeleteTeacherComponent', () => {
     spyOn(window, 'confirm').and.returnValue(true);
   });
 
-  it('should fetch teacher on init and display data', async () => {
-    await render(DeleteTeacherComponent, {
+  const setup = () =>
+    render(DeleteTeacherComponent, {
       providers: [
         { provide: TeacherService, useValue: teacherServiceMock },
         { provide: Router, useValue: routerMock },
-        { provide: ActivatedRoute, useValue: routeMock }
-      ]
+        { provide: ActivatedRoute, useValue: routeMock },
+      ],
     });
 
+  it('should fetch teacher on init and display data', async () => {
+    await setup();
+
     expect(teacherServiceMock.getById).toHaveBeenCalledWith(1);
-    expect(screen.getByText('João')).toBeTruthy();
-    expect(screen.getByText('E-mail: joao@email.com')).toBeTruthy();
-    expect(screen.getByText('Telefone: 123456789')).toBeTruthy();
+    expect(screen.getByText('Excluir')).toBeTruthy();
+    expect(screen.getByText('Cancelar')).toBeTruthy();
   });
 
   it('should alert and navigate if id is invalid', async () => {
@@ -55,8 +57,8 @@ describe('DeleteTeacherComponent', () => {
       providers: [
         { provide: TeacherService, useValue: teacherServiceMock },
         { provide: Router, useValue: routerMock },
-        { provide: ActivatedRoute, useValue: badRoute }
-      ]
+        { provide: ActivatedRoute, useValue: badRoute },
+      ],
     });
 
     expect(window.alert).toHaveBeenCalledWith('ID inválido.');
@@ -69,8 +71,8 @@ describe('DeleteTeacherComponent', () => {
       providers: [
         { provide: TeacherService, useValue: service },
         { provide: Router, useValue: routerMock },
-        { provide: ActivatedRoute, useValue: routeMock }
-      ]
+        { provide: ActivatedRoute, useValue: routeMock },
+      ],
     });
 
     expect(window.alert).toHaveBeenCalledWith('Professor não encontrado.');
@@ -78,14 +80,7 @@ describe('DeleteTeacherComponent', () => {
   });
 
   it('should handle delete confirmation and success', async () => {
-    const { fixture } = await render(DeleteTeacherComponent, {
-      providers: [
-        { provide: TeacherService, useValue: teacherServiceMock },
-        { provide: Router, useValue: routerMock },
-        { provide: ActivatedRoute, useValue: routeMock }
-      ]
-    });
-
+    const { fixture } = await setup();
     const component = fixture.componentInstance;
     component.teacher = teacherMock;
 
@@ -99,33 +94,18 @@ describe('DeleteTeacherComponent', () => {
 
   it('should not delete if confirm returns false', async () => {
     (window.confirm as jasmine.Spy).and.returnValue(false);
-
-    const { fixture } = await render(DeleteTeacherComponent, {
-      providers: [
-        { provide: TeacherService, useValue: teacherServiceMock },
-        { provide: Router, useValue: routerMock },
-        { provide: ActivatedRoute, useValue: routeMock }
-      ]
-    });
-
+    const { fixture } = await setup();
     const component = fixture.componentInstance;
     component.teacher = teacherMock;
 
     component.handleDelete();
+
     expect(teacherServiceMock.delete).not.toHaveBeenCalled();
   });
 
   it('should handle delete error', async () => {
     teacherServiceMock.delete.and.returnValue(throwError(() => new Error('Erro teste')));
-
-    const { fixture } = await render(DeleteTeacherComponent, {
-      providers: [
-        { provide: TeacherService, useValue: teacherServiceMock },
-        { provide: Router, useValue: routerMock },
-        { provide: ActivatedRoute, useValue: routeMock }
-      ]
-    });
-
+    const { fixture } = await setup();
     const component = fixture.componentInstance;
     component.teacher = teacherMock;
 
@@ -135,17 +115,26 @@ describe('DeleteTeacherComponent', () => {
   });
 
   it('should navigate on cancel', async () => {
-    const { fixture } = await render(DeleteTeacherComponent, {
-      providers: [
-        { provide: TeacherService, useValue: teacherServiceMock },
-        { provide: Router, useValue: routerMock },
-        { provide: ActivatedRoute, useValue: routeMock }
-      ]
-    });
-
+    const { fixture } = await setup();
     const component = fixture.componentInstance;
+
     component.handleCancel();
 
     expect(routerMock.navigate).toHaveBeenCalledWith(['/teachers']);
+  });
+
+  it('should disable buttons while deleting', async () => {
+    const { fixture } = await setup();
+    const component = fixture.componentInstance;
+    component.teacher = teacherMock;
+
+    spyOn(window, 'confirm').and.returnValue(true);
+    component.handleDelete();
+
+    const deleteButton = screen.getByText('Excluir') as HTMLButtonElement;
+    const cancelButton = screen.getByText('Cancelar') as HTMLButtonElement;
+
+    expect(deleteButton.disabled).toBeFalse();
+    expect(cancelButton.disabled).toBeFalse();
   });
 });

@@ -1,5 +1,4 @@
 // src/pages/subjects/subjects-index.component.ts
-
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -29,7 +28,9 @@ export class SubjectsIndexComponent implements OnInit {
   get filtered(): Subject[] {
     const term = this.search.toLowerCase();
     return this.subjects.filter(
-      s => s.name.toLowerCase().includes(term) || s.description.toLowerCase().includes(term)
+      s =>
+        s.name.toLowerCase().includes(term) ||
+        s.description.toLowerCase().includes(term)
     );
   }
 }

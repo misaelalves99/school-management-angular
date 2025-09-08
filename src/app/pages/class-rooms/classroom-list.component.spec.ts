@@ -8,6 +8,7 @@ import { ClassRoomService } from '../../services/classroom.service';
 import { RouterTestingModule } from '@angular/router/testing';
 import { ClassRoom } from '../../types/classroom.model';
 import { screen, render, fireEvent } from '@testing-library/angular';
+import { By } from '@angular/platform-browser';
 
 describe('ClassroomListComponent', () => {
   let component: ClassroomListComponent;
@@ -22,7 +23,6 @@ describe('ClassroomListComponent', () => {
 
   beforeEach(async () => {
     const serviceSpy = jasmine.createSpyObj('ClassRoomService', ['getAll']);
-
     serviceSpy.getAll.and.returnValue(of(mockData));
 
     await TestBed.configureTestingModule({
@@ -81,5 +81,40 @@ describe('ClassroomListComponent', () => {
     const input = screen.getByPlaceholderText('Digite o nome da sala...') as HTMLInputElement;
     fireEvent.input(input, { target: { value: 'Sala C' } });
     expect(input.value).toBe('Sala C');
+  });
+
+  //
+  // ---- Novos testes cobrindo atualizações do template ----
+  //
+  it('deve renderizar todas as salas com coluna ID', () => {
+    component.classrooms = mockData;
+    fixture.detectChanges();
+
+    const rows = fixture.debugElement.queryAll(By.css('tbody tr'));
+    expect(rows.length).toBe(3);
+
+    const firstRowCells = rows[0].queryAll(By.css('td')).map(cell => cell.nativeElement.textContent.trim());
+    expect(firstRowCells[0]).toBe('1'); // ID
+    expect(firstRowCells[1]).toBe('Sala A'); // Nome
+    expect(firstRowCells[2]).toBe('20'); // Capacidade
+    expect(firstRowCells[3]).toBe('Seg 08:00-10:00'); // Horário
+  });
+
+  it('cada linha deve ter botões de ações com routerLinks corretos', () => {
+    component.classrooms = mockData;
+    fixture.detectChanges();
+
+    const rows = fixture.debugElement.queryAll(By.css('tbody tr'));
+    const actionLinks = rows[1].queryAll(By.css('a')).map(a => a.nativeElement.getAttribute('ng-reflect-router-link'));
+
+    expect(actionLinks).toContain('/classrooms/details,2');
+    expect(actionLinks).toContain('/classrooms/edit,2');
+    expect(actionLinks).toContain('/classrooms/delete,2');
+  });
+
+  it('deve ter link "Cadastrar Nova Sala" para /classrooms/create', () => {
+    fixture.detectChanges();
+    const createBtn = fixture.debugElement.query(By.css('.btnSuccess')).nativeElement as HTMLAnchorElement;
+    expect(createBtn.getAttribute('ng-reflect-router-link')).toBe('/classrooms/create');
   });
 });

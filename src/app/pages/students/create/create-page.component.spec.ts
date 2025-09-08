@@ -11,12 +11,13 @@ import { render, screen, fireEvent } from '@testing-library/angular';
 describe('CreateStudentComponent', () => {
   let component: CreateStudentComponent;
   let fixture: ComponentFixture<CreateStudentComponent>;
-  let routerMock: Partial<Router>;
+  let routerMock: jasmine.SpyObj<Router>;
   let studentServiceMock: any;
 
   beforeEach(async () => {
-    routerMock = { navigate: jasmine.createSpy('navigate') };
-    studentServiceMock = { create: jasmine.createSpy('create').and.returnValue(of({})) };
+    routerMock = jasmine.createSpyObj('Router', ['navigate']);
+    studentServiceMock = jasmine.createSpyObj('StudentService', ['create']);
+    studentServiceMock.create.and.returnValue(of({}));
 
     await TestBed.configureTestingModule({
       imports: [CommonModule, FormsModule, CreateStudentComponent],
@@ -40,12 +41,14 @@ describe('CreateStudentComponent', () => {
   });
 
   it('should initialize student with empty fields', () => {
-    expect(component.student.name).toBe('');
-    expect(component.student.email).toBe('');
-    expect(component.student.dateOfBirth).toBe('');
-    expect(component.student.enrollmentNumber).toBe('');
-    expect(component.student.phone).toBe('');
-    expect(component.student.address).toBe('');
+    expect(component.student).toEqual({
+      name: '',
+      email: '',
+      dateOfBirth: '',
+      enrollmentNumber: '',
+      phone: '',
+      address: '',
+    });
   });
 
   it('should validate required fields', () => {
@@ -75,7 +78,7 @@ describe('CreateStudentComponent', () => {
   }));
 
   it('should not call studentService.create if validation fails', () => {
-    component.student = { ...component.student, name: '' };
+    component.student.name = '';
     component.onSubmit({} as NgForm);
 
     expect(studentServiceMock.create).not.toHaveBeenCalled();
@@ -104,15 +107,33 @@ describe('CreateStudentComponent', () => {
     component.validate();
     fixture.detectChanges();
 
-    const nameError = fixture.nativeElement.querySelector('.formError');
+    const nameError = fixture.nativeElement.querySelector('#name + .formError');
+    const emailError = fixture.nativeElement.querySelector('#email + .formError');
+    const dobError = fixture.nativeElement.querySelector('#dateOfBirth + .formError');
+    const enrollmentError = fixture.nativeElement.querySelector('#enrollmentNumber + .formError');
+
     expect(nameError.textContent).toContain('Nome é obrigatório.');
+    expect(emailError.textContent).toContain('Email é obrigatório.');
+    expect(dobError.textContent).toContain('Data de nascimento é obrigatória.');
+    expect(enrollmentError.textContent).toContain('Matrícula é obrigatória.');
   });
 
   it('should update inputs via ngModel', async () => {
     await render(CreateStudentComponent, { imports: [CommonModule, FormsModule] });
 
     const nameInput = screen.getByLabelText('Nome') as HTMLInputElement;
+    const emailInput = screen.getByLabelText('Email') as HTMLInputElement;
+    const dobInput = screen.getByLabelText('Data de Nascimento') as HTMLInputElement;
+    const enrollmentInput = screen.getByLabelText('Matrícula') as HTMLInputElement;
+
     fireEvent.input(nameInput, { target: { value: 'Novo Nome' } });
+    fireEvent.input(emailInput, { target: { value: 'novo@email.com' } });
+    fireEvent.input(dobInput, { target: { value: '2001-02-02' } });
+    fireEvent.input(enrollmentInput, { target: { value: '456' } });
+
     expect(nameInput.value).toBe('Novo Nome');
+    expect(emailInput.value).toBe('novo@email.com');
+    expect(dobInput.value).toBe('2001-02-02');
+    expect(enrollmentInput.value).toBe('456');
   });
 });
